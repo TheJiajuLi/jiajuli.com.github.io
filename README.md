@@ -1,2 +1,2 @@
 # jiajuli.com.github.io
-This is the repository used to build my personal website.
+This a repository I used to build/ construct my personal website.
