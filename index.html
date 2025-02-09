@@ -1,0 +1,58 @@
+<html><head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Jiaju's Webpage</title>
+</head>
+<body>
+    <h1>Jiaju's Webpage</h1>
+    <p>Hi, welcome to my personal website!</p>
+    <p>This is a picture of me</p>
+    <img src="images/jiaju_li.jpg" alt="Jiaju Li">
+    <p>You can find my most study resources here:</p>
+    <ul>
+        <li><a href="https://www.dropbox.com/scl/fo/06jyhza3n39i29x96tjje/APz1HA98cI4W2NGH3cWJAPQ?rlkey=scu9fwbc8073ip087u0k8cb53&amp;st=m1yrnsw0&amp;dl=0" class="preview-link" data-preview="images/number_theory.pdf">PDF</a></li>
+    </ul>
+    <p>And this is my social media:</p>
+    <ul>
+        <li><a href="https://www.instagram.com/the_jiaju_li">Instagram</a></li>
+    </ul>
+    <p>Theme song of my life:</p>
+    <audio id="audioTrack" controls="">
+        <source src="https://archive.org/download/indila-tourner-dans-le-vide/Indila%20-%20Tourner%20Dans%20Le%20Vide.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+    <div id="preview-container"></div>
+    <script>
+        let audio = document.getElementById("audioTrack");
+        function playAudio() {
+            audio.play();
+        }
+        function pauseAudio() {
+            audio.pause();
+        }
+
+        document.querySelectorAll('.preview-link').forEach(link => {
+            link.addEventListener('mouseover', function(event) {
+                const previewUrl = event.target.getAttribute('data-preview');
+                const previewContainer = document.getElementById('preview-container');
+                previewContainer.innerHTML = `<iframe src="${previewUrl}" frameborder="0" style="width: 300px; height: 200px;"></iframe>`;
+                previewContainer.style.display = 'block';
+                previewContainer.style.top = event.pageY + 'px';
+                previewContainer.style.left = event.pageX + 'px';
+            });
+
+            link.addEventListener('mouseout', function() {
+                const previewContainer = document.getElementById('preview-container');
+                previewContainer.style.display = 'none';
+                previewContainer.innerHTML = '';
+            });
+        });
+    </script>
+        <div class="copyright-container">
+        <div class="vert-align">
+          <p class="headline">
+            Copyright &copy; 2025 <a href="https://www.linkedin.com/in/jiaju-li-631616344/">Jiaju Li</a> All Rights Reserved
+            </a>
+            </p>
+ </body>
+</html>
