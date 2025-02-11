@@ -1,405 +1,164 @@
-body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    background-color: #f4f4f4;
-    background-image: url("assets/images/baroque_background.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: relative;
-    color: #ffffff;
-    min-height: 100vh; /* Ensure the background covers the entire viewport height */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+let audio = document.getElementById("audioTrack");
+let cd = document.getElementById("cd");
+let stopButton = document.getElementById("stopButton");
+let backgroundAudio = document.getElementById('backgroundAudio');
+let messageBox = document.getElementById('music-intro');
+let messageBoxParagraphs = messageBox.querySelectorAll('p');
+let messageBoxTimeout;
+let dropdownContent = document.querySelector('.dropdown-content');
+let dropbtn = document.querySelector('.dropbtn');
+let isDropdownOpen = false;
+let LegendModeButton = document.getElementById('LegendModeButton');
+let ClassicalModeButton = document.getElementById('ClassicalModeButton');
+let typingText = document.getElementById('typingText');
+
+function playAudio() {
+    backgroundAudio.play();
+    cd.style.animationPlayState = 'running';
+    stopButton.textContent = 'Pause';
+    console.log('Playing audio:', backgroundAudio.src);
 }
 
-body::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
+function pauseAudio() {
+    backgroundAudio.pause();
+    cd.style.animationPlayState = 'paused';
+    stopButton.textContent = 'Play';
+    console.log('Pausing audio');
 }
 
-h1 {
-    text-align: center;
-    color: #ffffff;
-    font-size: 3em;
-    margin-top: 0; /* Adjust margin to move content up */
-    animation: fadeIn 2s ease-in-out;
-}
 
-p {
-    color: #ffffff;
-    font-size: 1.2em;
-    margin: 10px 0;
-    animation: fadeIn 2s ease-in-out;
-}
+LegendModeButton.addEventListener('click', function() {
+    backgroundAudio.src = 'assets/musics/legend_mode_theme_song.mp3';
+    playAudio();
+    console.log('Legend mode button clicked, playing audio:', backgroundAudio.src);
+});
 
-img {
-    border-radius: 50%;
-    margin: 20px 0;
-    width: 150px;
-    height: 150px;
-    animation: fadeIn 2s ease-in-out;
-}
+ClassicalModeButton.addEventListener('click', function() {
+    backgroundAudio.src = 'assets/musics/sonata_no_8.wav';
+    playAudio();
+    console.log('Classical mode button clicked, playing audio:', backgroundAudio.src);
+    typeText('You Are Now Back to the 19th Century');
+});
 
-ul {
-    list-style-type: none;
-    padding: 0;
-    animation: fadeIn 2s ease-in-out;
-}
-
-li {
-    margin: 10px 0;
-}
-
-a {
-    text-decoration: none;
-    color: #007BFF;
-    font-weight: bold;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-button {
-    margin: 10px;
-    padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
+function typeText(text) {
+    typingText.style.display = 'block';
+    typingText.textContent = '';
+    let index = 0;
+    function type() {
+        if (index < text.length) {
+            typingText.textContent += text.charAt(index);
+            index++;
+            setTimeout(type, 100);
+        }
     }
-    to {
-        opacity: 1;
+    type();
+}
+
+document.querySelectorAll('.preview-link').forEach(link => {
+    link.addEventListener('mouseover', function(event) {
+        const previewUrl = event.target.getAttribute('data-preview');
+        const previewContainer = document.getElementById('preview-container');
+        previewContainer.innerHTML = `<iframe src="${previewUrl}" frameborder="0" style="width: 300px; height: 200px;"></iframe>`;
+        previewContainer.style.display = 'block';
+        previewContainer.style.top = event.pageY + 'px';
+        previewContainer.style.left = event.pageX + 'px';
+    });
+
+    link.addEventListener('mouseout', function() {
+        const previewContainer = document.getElementById('preview-container');
+        previewContainer.style.display = 'none';
+        previewContainer.innerHTML = '';
+    });
+});
+
+document.querySelectorAll('.music-link').forEach(link => {
+    link.addEventListener('click', function(event) {
+        event.preventDefault();
+        const musicUrl = event.target.getAttribute('href');
+        backgroundAudio.src = musicUrl;
+        playAudio();
+        console.log('Music link clicked, playing audio:', backgroundAudio.src);
+    });
+});
+
+stopButton.addEventListener('click', function() {
+    if (backgroundAudio.paused) {
+        playAudio();
+    } else {
+        pauseAudio();
     }
-}
+});
 
-#preview-container {
-    display: none;
-    position: absolute;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    padding: 10px;
-    border-radius: 5px;
-    z-index: 1000;
-}
-
-.message-box {
-    display: none;
-    font-size: 0.7em;
-    position: absolute;
-    top: 10px; /* Adjusted to position further from the Music bar */
-    left: 110px;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    padding: 10px;
-    border-radius: 5px;
-    z-index: 1000;
-    width: 300px;
-    animation: fadeIn 1.7s ease-in-out;
-}
-
-.message-box p {
-    display: none;
-    animation: fadeInText 0.5s ease-in-out forwards;
-}
-
-@keyframes fadeInText {
-    from {
-        opacity: 0;
+dropbtn.addEventListener('click', function() {
+    if (isDropdownOpen) {
+        dropdownContent.style.maxHeight = '0';
+        isDropdownOpen = false;
+    } else {
+        dropdownContent.style.maxHeight = dropdownContent.scrollHeight + 'px';
+        isDropdownOpen = true;
     }
-    to {
-        opacity: 1;
-    }
-}
+});
 
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0;
-    }
-}
+dropbtn.addEventListener('mouseover', function() {
+    clearTimeout(messageBoxTimeout);
+    messageBox.style.display = 'block';
+    messageBox.classList.remove('fade-out');
+    messageBoxParagraphs.forEach((p, index) => {
+        setTimeout(() => {
+            p.style.display = 'block';
+        }, index * 500);
+    });
+});
 
-.message-box.fade-out {
-    animation: fadeOut 2s ease-in-out forwards;
-}
+dropbtn.addEventListener('mouseout', function() {
+    messageBoxTimeout = setTimeout(() => {
+        messageBox.classList.add('fade-out');
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+            messageBoxParagraphs.forEach(p => {
+                p.style.display = 'none';
+            });
+        }, 2000);
+    }, 500); // Delay before starting to fade out
+});
 
-.copyright-container {
-    font-size: 0.7em;
-    box-sizing: border-box;
-    padding-right: 10px;
-    padding-left: 10px;
-    text-align: center;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 50px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.8); /* Optional: Add background color */
-}
+dropdownContent.addEventListener('mouseover', function() {
+    clearTimeout(messageBoxTimeout);
+    messageBox.style.display = 'none';
+    messageBoxParagraphs.forEach(p => {
+        p.style.display = 'none';
+    });
+});
 
-.special-link {
-    color: #ffffff; /* White color for the link */
-    text-decoration: none; /* Optional: Remove underline */
-}
+dropdownContent.addEventListener('mouseout', function() {
+    messageBoxTimeout = setTimeout(() => {
+        messageBox.classList.add('fade-out');
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+            messageBoxParagraphs.forEach(p => {
+                p.style.display = 'none';
+            });
+        }, 2000);
+    }, 500); // Delay before starting to fade out
+});
 
-.special-link:hover {
-    color: #007BFF; /* Blue color on hover */
-}
+messageBox.addEventListener('click', function() {
+    messageBox.style.display = 'none';
+    messageBoxParagraphs.forEach(p => {
+        p.style.display = 'none';
+    });
+});
 
-.dropdown {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-}
-
-.dropbtn, .legend-mode-button, .classical-mode-button {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    text-align: left;
-    display: block;
-    margin-top: 5px;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #FFFFFF; /* Make the music list transparent */
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-}
-
-.dropdown-content a {
-    color: #b52ed4;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    font-size: 0.7em; /* Same font size as h3 */
-}
-
-.dropdown-content a:hover {
-    background-color: #f1f1f1;
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-.dropdown:hover + .message-box {
-    display: block;
-}
-
-.dropdown-section {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-}
-
-.dropdown-section h3 {
-    margin: 0;
-    padding: 10px 0;
-    font-size: 0.7em;
-    color: #007BFF;
-    cursor: pointer;
-}
-
-.dropdown-section .music-list {
-    display: none;
-    padding-left: 20px;
-    max-height: 30vh; /* Set maximum height to 50% of the viewport height */
-    overflow-y: auto; /* Enable vertical scrolling */
-}
-
-.dropdown-section .music-list a {
-    display: block;
-    margin: 5px 0;
-}
-
-.dropdown-section .expand-tab {
-    display: inline-block;
-    margin-left: 10px;
-    cursor: pointer;
-}
-
-.music_names {
-    font-size: 0.7em;
-    color: #ffffff;
-}
-
-.cd-container {
-    position: fixed;
-    top: 80%;
-    left: 90%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.cd {
-    width: 100px;
-    height: 100px;
-    animation: spin 2s linear infinite;
-    animation-play-state: paused; /* Start paused */
-}
-
-.stop-button {
-    margin-top: 10px;
-    padding: 5px 10px;
-    background-color: #ff0000;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.stop-button:hover {
-    background-color: #cc0000;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.legend-mode-button {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    padding: 5px 10px;
-    background-color: #ff4500;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    animation: pulse 5s infinite;
-}
-
-.legend-mode-button:hover {
-    background-color: #ff6347;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-.classical-mode-button {
-    position: fixed;
-    top: 60px;
-    right: 10px;
-    padding: 5px 10px;
-    background-color: #008080;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    animation: pulse 5s infinite;
-}
-
-.classical-mode-button:hover {
-    background-color: #20b2aa;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-.typing-text {
-    position: fixed;
-    top: 120px;
-    right: 10px;
-    font-size: 16px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.8);
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    display: none;
-}
-
-@keyframes typing {
-    from { width: 0; }
-    to { width: 100%; }
-}
-
-@keyframes blink-caret {
-    from, to { border-color: transparent; }
-    50% { border-color: white; }
-}
-
-.typing-text::after {
-    content: '';
-    border-right: .15em solid white;
-    animation: blink-caret .75s step-end infinite;
-}
-
-@keyframes pulse {
-    0% {
-        background-color: #ff4500;
-    }
-    25% {
-        background-color: #8a47ff;
-    }
-    50% {
-        background-color: #ff00b7;
-    }
-    75% {
-        background-color: #25d92b;
-    }
-    100% {
-        background-color: #ffffff;
-    }
-}
-
-@keyframes shake {
-    0% { transform: translate(1px, 1px) rotate(0deg); }
-    10% { transform: translate(-1px, 1px) rotate(0deg); }
-    20% { transform: translate(-3px, 1px) rotate(0deg); }
-    30% { transform: translate(3px, 1px) rotate(0deg); }
-    40% { transform: translate(1px, 1px) rotate(0deg); }
-    50% { transform: translate(-1px, 1px) rotate(0deg); }
-    60% { transform: translate(-3px, 1px) rotate(0deg); }
-    70% { transform: translate(3px, 1px) rotate(0deg); }
-    80% { transform: translate(-1px, 1px) rotate(0deg); }
-    90% { transform: translate(1px, 1px) rotate(0deg); }
-    100% { transform: translate(1px, 1px) rotate(0deg); }
-}
-
-.shake {
-    animation: shake 0.5s;
-    animation-iteration-count: infinite;
-}
+document.querySelectorAll('.expandable').forEach(section => {
+    section.addEventListener('click', function() {
+        const musicList = this.nextElementSibling;
+        const expandTab = this.querySelector('.expand-tab');
+        if (musicList.style.display === 'block') {
+            musicList.style.display = 'none';
+            expandTab.textContent = '▼';
+        } else {
+            musicList.style.display = 'block';
+            expandTab.textContent = '▲';
+        }
+    });
+});
