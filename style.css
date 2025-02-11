@@ -10,7 +10,13 @@ body {
     background-repeat: no-repeat;
     position: relative;
     color: #ffffff;
+    min-height: 100vh; /* Ensure the background covers the entire viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
+
 body::before {
     content: '';
     position: absolute;
@@ -21,19 +27,22 @@ body::before {
     background: rgba(0, 0, 0, 0.5);
     z-index: -1;
 }
+
 h1 {
     text-align: center;
     color: #ffffff;
     font-size: 3em;
-    margin-top: 20px;
+    margin-top: 0; /* Adjust margin to move content up */
     animation: fadeIn 2s ease-in-out;
 }
+
 p {
     color: #ffffff;
     font-size: 1.2em;
     margin: 10px 0;
     animation: fadeIn 2s ease-in-out;
 }
+
 img {
     border-radius: 50%;
     margin: 20px 0;
@@ -41,22 +50,27 @@ img {
     height: 150px;
     animation: fadeIn 2s ease-in-out;
 }
+
 ul {
     list-style-type: none;
     padding: 0;
     animation: fadeIn 2s ease-in-out;
 }
+
 li {
     margin: 10px 0;
 }
+
 a {
     text-decoration: none;
     color: #007BFF;
     font-weight: bold;
 }
+
 a:hover {
     text-decoration: underline;
 }
+
 button {
     margin: 10px;
     padding: 10px 20px;
@@ -67,9 +81,11 @@ button {
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
+
 button:hover {
     background-color: #0056b3;
 }
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -78,6 +94,7 @@ button:hover {
         opacity: 1;
     }
 }
+
 #preview-container {
     display: none;
     position: absolute;
@@ -87,6 +104,7 @@ button:hover {
     border-radius: 5px;
     z-index: 1000;
 }
+
 .message-box {
     display: none;
     font-size: 0.7em;
@@ -99,7 +117,36 @@ button:hover {
     border-radius: 5px;
     z-index: 1000;
     width: 300px;
+    animation: fadeIn 1.7s ease-in-out;
 }
+
+.message-box p {
+    display: none;
+    animation: fadeInText 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeInText {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.message-box.fade-out {
+    animation: fadeOut 2s ease-in-out forwards;
+}
+
 .copyright-container {
     font-size: 0.7em;
     box-sizing: border-box;
@@ -131,7 +178,7 @@ button:hover {
 
 .dropbtn {
     background-color: #007BFF;
-    color: white;
+    color: rgb(255, 255, 255);
     padding: 16px;
     font-size: 16px;
     border: none;
@@ -142,14 +189,14 @@ button:hover {
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #f9f9f9;
+    background-color: #FFFFFF; /* Make the music list transparent */
     min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
 }
 
 .dropdown-content a {
-    color: black;
+    color: #b52ed4;
     padding: 12px 16px;
     text-decoration: none;
     display: block;
@@ -170,6 +217,7 @@ button:hover {
 
 .dropdown-section {
     padding: 10px;
+    border-bottom: 1px solid #ccc;
 }
 
 .dropdown-section h3 {
@@ -177,7 +225,27 @@ button:hover {
     padding: 10px 0;
     font-size: 0.7em;
     color: #007BFF;
+    cursor: pointer;
 }
+
+.dropdown-section .music-list {
+    display: none;
+    padding-left: 20px;
+    max-height: 30vh; /* Set maximum height to 50% of the viewport height */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.dropdown-section .music-list a {
+    display: block;
+    margin: 5px 0;
+}
+
+.dropdown-section .expand-tab {
+    display: inline-block;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
 .music_names {
     font-size: 0.7em;
     color: #ffffff;
@@ -185,8 +253,8 @@ button:hover {
 
 .cd-container {
     position: fixed;
-    top: 50%;
-    left: 0;
+    top: 80%;
+    left: 90%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
@@ -221,4 +289,114 @@ button:hover {
     to {
         transform: rotate(360deg);
     }
+}
+
+.legend-mode-button {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    background-color: #ff4500;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    animation: pulse 5s infinite;
+}
+
+.legend-mode-button:hover {
+    background-color: #ff6347;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.classical-mode-button {
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    padding: 5px 10px;
+    background-color: #008080;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    animation: pulse 5s infinite;
+}
+
+.classical-mode-button:hover {
+    background-color: #20b2aa;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.typing-text {
+    position: fixed;
+    top: 120px;
+    right: 10px;
+    font-size: 16px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: white; }
+}
+
+.typing-text::after {
+    content: '';
+    border-right: .15em solid white;
+    animation: blink-caret .75s step-end infinite;
+}
+
+@keyframes pulse {
+    0% {
+        background-color: #ff4500;
+    }
+    25% {
+        background-color: #8a47ff;
+    }
+    50% {
+        background-color: #ff00b7;
+    }
+    75% {
+        background-color: #25d92b;
+    }
+    100% {
+        background-color: #ffffff;
+    }
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, 1px) rotate(0deg); }
+    20% { transform: translate(-3px, 1px) rotate(0deg); }
+    30% { transform: translate(3px, 1px) rotate(0deg); }
+    40% { transform: translate(1px, 1px) rotate(0deg); }
+    50% { transform: translate(-1px, 1px) rotate(0deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(0deg); }
+    80% { transform: translate(-1px, 1px) rotate(0deg); }
+    90% { transform: translate(1px, 1px) rotate(0deg); }
+    100% { transform: translate(1px, 1px) rotate(0deg); }
+}
+
+.shake {
+    animation: shake 0.5s;
+    animation-iteration-count: infinite;
 }

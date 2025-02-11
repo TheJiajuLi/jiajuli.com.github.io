@@ -3,7 +3,6 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <title>Jiaju's Webpage</title>
 </head>
 <body>
@@ -15,27 +14,27 @@
         <button class="dropbtn">Music</button>
         <div class="dropdown-content">
             <div class="dropdown-section">
-                <h3>My piano recordings</h3>
-                <a href="assets/musics/nocturne_2.wav" class="music-link">Nocturne in E-flat Major, Op. 9 No. 2</a>
-                <a href="" class="music-link">Classical 2</a>
+                <h3 class="expandable">My piano recordings <span class="expand-tab">▼</span></h3>
+                <div class="music-list">
+                    <a href="assets/musics/nocturne_2.wav" class="music-link">Nocturne in E-flat Major, Op. 9 No. 2</a>
+                    <a href="assets/musics/claire_de_lune.wav" class="music-link">Debussy: Suite bergamasque. L. 75/3. Clair de lune</a>
+                    <a href="assets/musics/liebestraume.wav" class="music-link">Liszt: Liebesträume in A-flat Major, S. 541/3</a>
+                    <a href="assets/musics/sonata_no_8.wav" class="music-link">Beethoven: Piano Sonata No. 8 in C Minor, Op. 13/2</a>
+                    <a href="assets/musics/nocturne_19.wav" class="music-link">Chopin: Nocturne No. 19 in E-Minor, Op. 72/1</a>
+                </div>
             </div>
             <div class="dropdown-section">
-                <h3>My original musics (Classical)</h3>
-                <a href="assets/musics/pop1.wav" class="music-link">Pop 1</a>
-                <a href="assets/musics/pop2.wav" class="music-link">Pop 2</a>
+                <h3 class="expandable">My original musics (Classical) <span class="expand-tab">▼</span></h3>
+                <div class="music-list">
+                    <a href="assets/musics/pop1.wav" class="music-link">Pop 1</a>
+                    <a href="assets/musics/pop2.wav" class="music-link">Pop 2</a>
+                </div>
             </div>
         </div>
     </div>
-    <div id="music-intro" class="message-box">Here're some of my piano recordings back to the time I'm still a piano enthusiast. However, as I'm getting more and 
-        more interested and good at it, it leads to a quite unsatifactory result and scary fact that, learning a piano or say making musics is actually a quite 
-        negative thing to do. Because you are sit down and spending all these time with a note book. You are absolutely missing everything and staying distracted. 
-        You isolated yourself without communication to nobody. Or choose to gain some useful skill-sets that will develop you into a man in this modern society. 
-        It does zero or even negative contributes to my life. So, as being a young man trapped in his past missed some of his opportunities, he began to review 
-        himself and start make some decisions. He knews, ignoring God and the universe will not bring him any success but will not estroy him. He chose to become 
-        a better version of himself. Instead of having these pleasures absolutely doing nothing. I should really start to living my life and engage myself with 
-        good people. I know I'm not born rich, so, and I know nothing comes as easy as it look like. Anyway, listening to these musics are not as much as you 
-        literally practicing and writing them. So, I should say please feel free to listen and enjoy your life, thanks!</div>
-    <div class="preview-container" id="preview-container">
+    <div id="music-intro" class="message-box">
+        <h3>A not so interesting story behind the scene</h3>
+        <p>Here're some of my piano recordings back to the time I'm still a piano enthusiast. However, as I'm getting more and more interested and good at it, it leads to a quite unsatisfactory result and scary fact that, learning a piano or say making musics is actually a quite negative thing to do. Because you are sit down and spending all these time with a note book. You are absolutely missing everything and staying distracted. You isolated yourself without communication to nobody. Or choose to gain some useful skill-sets that will develop you into a man in this modern society. It does zero or even negative contributes to my life. So, as being a young man trapped in his past missed some of his opportunities, he began to review himself and start make some decisions. He knews, ignoring God and the universe will not bring him any success but will not estroy him. He chose to become a better version of himself. Instead of having these pleasures absolutely doing nothing. I should really start to living my life and engage myself with good people. I know I'm not born rich, so, and I know nothing comes as easy as it look like. Anyway, listening to these musics are not as much as you literally practicing and writing them. So, I should say please feel free to listen and enjoy your life, thanks!</p>
     </div>
     <h1>Jiaju's Webpage</h1>
     <p>Hi, welcome to my personal website!</p>
@@ -49,14 +48,11 @@
     <ul>
         <li><a href="https://www.instagram.com/the_jiaju_li">Instagram</a></li>
     </ul>
-    <p>Theme song of my life:</p>
-    <audio id="audioTrack" controls="">
-        <source src="https://archive.org/download/indila-tourner-dans-le-vide/Indila%20-%20Tourner%20Dans%20Le%20Vide.mp3" type="audio/mp3">
-        Your browser does not support the audio element.
-    </audio>
     <div id="preview-container"></div>
-    <audio id="backgroundAudio" controls style="display: none;"></audio>
-    <script src="script.js"></script>
+    <audio id="backgroundAudio" controls style="display: None;"></audio>
+    <button id="LegendModeButton" class="legend-mode-button">Enter the Legend Mode</button>
+    <button id="ClassicalModeButton" class="classical-mode-button">Enter the Classical Mode</button>
+    <div id="typingText" class="typing-text"></div>
     <div class="copyright-container">
         <div class="vert-align">
             <p class="headline">
@@ -66,12 +62,6 @@
             </p>
         </div>
     </div>
-    <script>
-        const markdownContent = `
-*Here're some recordings I have played before back to the time when I loved playing piano; You can also find some of the classical music that is originated/composed by me when I was still a musician. Enjoy!*
-        `;
-
-        document.getElementById('music-intro').innerHTML = marked(markdownContent);
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
