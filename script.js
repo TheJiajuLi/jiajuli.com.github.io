@@ -86,10 +86,10 @@ legendModeButton.addEventListener('click', function() {
     backgroundAudio.src = 'assets/musics/single_tracks/legend_mode_theme_song.mp3';
     playAudio();
     console.log('Legend mode button clicked, playing audio:', backgroundAudio.src);
-    typeText(legendModeText);
     legendModeButton.textContent = 'You Are Now in Legend Mode';
     classicalModeButton.textContent = 'Classical Mode'; // Reset the other button's text
     cd.src = 'assets/images/cd.png'; // Reset CD image
+    body.style.backgroundImage = 'url("assets/images/legend_mode_background.jpg")'; // Change background image
     body.classList.add('legend-mode-active'); // Add class to body for legend mode
     videoContainer.style.display = 'block';
     legendVideo.src = videoUrls[currentVideoIndex];
@@ -118,7 +118,7 @@ classicalModeButton.addEventListener('click', function() {
     legendVideo.src = ''; // Clear video source
     document.querySelector('h1').style.display = 'block';
     document.querySelectorAll('p').forEach(p => p.style.display = 'block');
-    document.querySelector('img').style.display = 'block';
+    document.querySelector('img').style.display = 'none';
     stopButton.textContent = 'Pause'; // Reset stop button text
     stopButton.onclick = function() {
         if (backgroundAudio.paused) {

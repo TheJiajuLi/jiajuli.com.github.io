@@ -17,6 +17,11 @@ body {
     transition: background-image 1s ease-in-out; /* Smooth transition for background image */
 }
 
+body.legend-mode-active {
+    background-image: none; /* Remove background image when legend mode is active */
+    background-color: white; /* Set background color to white when legend mode is active */
+}
+
 body::before {
     content: '';
     position: absolute;
@@ -119,7 +124,7 @@ button:hover {
     padding: 10px;
     border-radius: 5px;
     z-index: 1000;
-    width: 300px;
+    max-width: 300px;
     animation: fadeIn 1.7s ease-in-out;
 }
 
@@ -169,7 +174,7 @@ button:hover {
     text-decoration: none; /* Optional: Remove underline */
 }
 
-special-link:hover {
+.special-link:hover {
     color: #007BFF; /* Blue color on hover */
 }
 
@@ -259,7 +264,7 @@ special-link:hover {
 .cd-container {
     position: fixed;
     top: 1%;
-    left: 72%;
+    left: 58%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
@@ -281,15 +286,14 @@ special-link:hover {
 }
 
 .stop-button {
-    position: fixed;
-    top: 3.1%;
-    left: 60%;
-    padding: 5px 10px;
+    top: 12%;
+    padding: 10px 10px; /* Increase padding for better touch targets on mobile */
     background-color: #ff0000;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 12px; /* Increase font size for better readability on mobile */
 }
 
 .stop-button:hover {
@@ -439,10 +443,6 @@ body.legend-mode-active .video-background {
     opacity: 1; /* Fully visible when legend mode is active */
 }
 
-body.legend-mode-active {
-    background-image: none; /* Remove background image when legend mode is active */
-}
-
 .video-control-button {
     display: none; /* Hide by default */
     position: absolute;
@@ -505,4 +505,135 @@ body.legend-mode-active .video-control-button {
     background-color: rgba(0, 0, 0, 0.9);
 }
 
+.stop-button {
+    position: fixed;
+    top: 3.4%;
+    left: 60%;
+    padding: 5px 10px;
+    background-color: #ff0000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
+.stop-button:hover {
+    background-color: #cc0000;
+}
+
+.video-container {
+    position: fixed;
+    top: 60.7%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    display: none;
+}
+
+.video-container iframe {
+    width: 1230px;
+    height: 580px;
+    opacity: 0.8; /* Make the iframe semi-transparent */
+}
+
+/* Media Queries for Mobile Devices */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    p {
+        font-size: 1em;
+    }
+
+    .cd-container {
+        position: static;
+        margin: 20px 0;
+    }
+
+    .cd {
+        position: static;
+        margin: 0;
+        top: auto;
+        left: auto;
+    }
+
+    .legend-mode-button,
+    .classical-mode-button {
+        position: static;
+        margin-top: 10px;
+        padding: 5px 10px;
+    }
+
+    .stop-button {
+        position: fixed;
+        top: 6%;
+        left: 85%;
+        width: 50px;
+        padding: 5px 10px;
+        background-color: #ff0000;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .video-container iframe {
+        width: 100%;
+        height: auto;
+    }
+
+    .dropdown {
+        position: static;
+        width: 100%;
+        margin-top: 30px;
+    }
+
+    .dropbtn {
+        width: 100%;
+        max-width: 300px; /* Ensure button takes full width on mobile */
+    }
+
+    .dropdown-content {
+        width: 100%;
+    }
+
+    .message-box {
+        position: fixed;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .copyright-container {
+        position: fixed;
+        margin-top: 20px;
+    }
+
+    .exit-legend-mode-button,
+    .exit-classical-mode-button {
+        position: fixed;
+        margin-top: 10px;
+        width: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .stop-button {
+        padding: fit-content;
+        top: 6%;
+        left: 85%;
+        width: 50px; /* Ensure button takes full width on mobile */
+    }
+
+    .message-box {
+        width: 100%;
+        max-width: 300px; /* Adjust max-width for better fit on mobile */
+    }
+}
