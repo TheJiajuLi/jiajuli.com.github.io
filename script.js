@@ -110,7 +110,7 @@ legendModeButton.addEventListener('click', function() {
     document.querySelectorAll('p').forEach(p => p.style.display = 'none');
     document.querySelector('img').style.display = 'none';
     stopButton.textContent = 'Play the Video'; // Change stop button text to control video
-    stopButton.onclick = toggleVideo; // Change stop button event to control video
+    stopButton.onclick = toggleVideo;// Change stop button event to control video
     document.getElementById('stopButton').classList.remove('pulse'); // Remove pulse animation
     exitLegendModeButton.style.display = 'block';
     exitClassicalModeButton.style.display = 'none'; // Hide classical mode exit button
