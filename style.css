@@ -181,7 +181,8 @@ button:hover {
 .dropdown {
     position: absolute;
     top: 10px;
-    left: 10px;
+    left: 20px;
+    animation: fadeIn 2s ease-in-out;
 }
 
 .dropbtn {
@@ -272,6 +273,7 @@ button:hover {
     width: 200px;
     height: auto;
     margin-left: 20px;
+    animation: fadeIn 2s ease-in-out;
 }
 
 .cd {
@@ -294,6 +296,7 @@ button:hover {
     border-radius: 5px;
     cursor: pointer;
     font-size: 12px; /* Increase font size for better readability on mobile */
+    animation: fadeIn 2s ease-in-out;
 }
 
 .stop-button:hover {
@@ -323,7 +326,7 @@ button:hover {
     font-size: 12px;
     font-weight: bold;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color 0.3s;
     animation: pulse 5s infinite;
     width: 200px; /* Ensure both buttons have the same width */
 }
@@ -515,6 +518,7 @@ body.legend-mode-active .video-control-button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    animation: pulse 2s infinite; /* Apply the pulse animation */
 }
 
 .stop-button:hover {
@@ -556,6 +560,7 @@ body.legend-mode-active .video-control-button {
     .cd-container {
         position: static;
         margin: 20px 0;
+        cursor: pointer;
     }
 
     .cd {
@@ -563,6 +568,7 @@ body.legend-mode-active .video-control-button {
         margin: 0;
         top: auto;
         left: auto;
+        cursor: pointer;
     }
 
     .legend-mode-button,
@@ -622,6 +628,14 @@ body.legend-mode-active .video-control-button {
         margin-top: 10px;
         width: auto;
     }
+}
+
+body.reset-animations * {
+    animation: none !important;
+}
+
+.cd {
+    cursor: pointer;
 }
 
 @media (max-width: 600px) {
