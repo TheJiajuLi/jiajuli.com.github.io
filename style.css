@@ -270,16 +270,10 @@ button:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
-<<<<<<< HEAD
     width: 200px;
     height: auto;
     margin-left: 20px;
     animation: fadeIn 2s ease-in-out;
-=======
-    width: 200px;
-    height: auto;
-    margin-left: 20px;
->>>>>>> a974fa50b7bc2310604309413c615854314e27e3
 }
 
 .cd {
@@ -301,12 +295,8 @@ button:hover {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-<<<<<<< HEAD
     font-size: 12px; /* Increase font size for better readability on mobile */
     animation: fadeIn 2s ease-in-out;
-=======
-    font-size: 12px; /* Increase font size for better readability on mobile */
->>>>>>> a974fa50b7bc2310604309413c615854314e27e3
 }
 
 .stop-button:hover {
@@ -444,7 +434,6 @@ button:hover {
     transition: opacity 1s ease-in-out; /* Smooth transition for opacity */
 }
 
-<<<<<<< HEAD
 .video-background iframe {
     width: 80%;
     height: 80%;
@@ -662,211 +651,3 @@ body.reset-animations * {
         max-width: 300px; /* Adjust max-width for better fit on mobile */
     }
 }
-=======
-.video-background iframe {
-    width: 80%;
-    height: 80%;
-    border: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    transition: transform 1s ease-in-out; /* Smooth transition for transform */
-}
-
-body.legend-mode-active .video-background {
-    opacity: 1; /* Fully visible when legend mode is active */
-}
-
-.video-control-button {
-    display: none; /* Hide by default */
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    font-size: 16px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 1;
-}
-
-.video-control-button:hover {
-    background-color: rgba(0, 0, 0, 0.9);
-}
-
-body.legend-mode-active .video-control-button {
-    display: block; /* Show when legend mode is active */
-}
-
-.exit-legend-mode-button {
-    position: fixed;
-    top: 5%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 10px 20px;
-    font-size: 16px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 1;
-}
-
-.exit-legend-mode-button:hover {
-    background-color: rgba(0, 0, 0, 0.9);
-}
-
-.exit-classical-mode-button {
-    position: fixed;
-    top: 5%;
-    right: 50%;
-    transform: translate(50%, -50%);
-    padding: 10px 20px;
-    font-size: 16px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 1;
-}
-
-.exit-classical-mode-button:hover {
-    background-color: rgba(0, 0, 0, 0.9);
-}
-
-.stop-button {
-    position: fixed;
-    top: 3.4%;
-    left: 60%;
-    padding: 5px 10px;
-    background-color: #ff0000;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.stop-button:hover {
-    background-color: #cc0000;
-}
-
-.video-container {
-    position: fixed;
-    top: 60.7%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    display: none;
-}
-
-.video-container iframe {
-    width: 1230px;
-    height: 580px;
-    opacity: 0.8; /* Make the iframe semi-transparent */
-}
-
-/* Media Queries for Mobile Devices */
-@media (max-width: 768px) {
-    body {
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        padding: 20px;
-    }
-
-    h1 {
-        font-size: 2em;
-    }
-
-    p {
-        font-size: 1em;
-    }
-
-    .cd-container {
-        position: static;
-        margin: 20px 0;
-    }
-
-    .cd {
-        position: static;
-        margin: 0;
-        top: auto;
-        left: auto;
-    }
-
-    .legend-mode-button,
-    .classical-mode-button {
-        position: static;
-        margin-top: 10px;
-        padding: 5px 10px;
-    }
-
-    .stop-button {
-        position: fixed;
-        top: 6%;
-        left: 85%;
-        width: 50px;
-        padding: 5px 10px;
-        background-color: #ff0000;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .video-container iframe {
-        width: 100%;
-        height: auto;
-    }
-
-    .dropdown {
-        position: static;
-        width: 100%;
-        margin-top: 30px;
-    }
-
-    .dropbtn {
-        width: 100%;
-        max-width: 300px; /* Ensure button takes full width on mobile */
-    }
-
-    .dropdown-content {
-        width: 100%;
-    }
-
-    .message-box {
-        position: fixed;
-        width: 100%;
-        margin-top: 10px;
-    }
-
-    .copyright-container {
-        position: fixed;
-        margin-top: 20px;
-    }
-
-    .exit-legend-mode-button,
-    .exit-classical-mode-button {
-        position: fixed;
-        margin-top: 10px;
-        width: auto;
-    }
-}
-
-@media (max-width: 600px) {
-    .stop-button {
-        padding: fit-content;
-        top: 6%;
-        left: 85%;
-        width: 50px; /* Ensure button takes full width on mobile */
-    }
-
-    .message-box {
-        width: 100%;
-        max-width: 300px; /* Adjust max-width for better fit on mobile */
-    }
-}
->>>>>>> a974fa50b7bc2310604309413c615854314e27e3
