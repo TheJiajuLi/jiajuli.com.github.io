@@ -1,6 +1,6 @@
 let audio = document.getElementById("audioTrack");
 let cd = document.getElementById("cd");
-let stopButton = document.getElementById("stopButton");
+let videoToggleButton = document.getElementById("videoToggleButton"); // Renamed from stopButton
 let backgroundAudio = document.getElementById('backgroundAudio');
 let messageBox = document.getElementById('music-intro');
 let messageBoxParagraphs = messageBox.querySelectorAll('p');
@@ -59,26 +59,23 @@ function generateMusicList() {
         });
         musicList.appendChild(musicLink);
     }
-}
-
-// Generate the music list on page load
+} // Generate the music list on page load
 window.addEventListener('load', function() {
     backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav';
     console.log('Default audio set on load:', backgroundAudio.src);
     generateMusicList();
+    displayUKTime(); // Display UK time on load
 });
 
 function playAudio() {
     backgroundAudio.play();
     cd.style.animationPlayState = 'running';
-    stopButton.textContent = 'Pause';
     console.log('Playing audio:', backgroundAudio.src);
 }
 
 function pauseAudio() {
     backgroundAudio.pause();
     cd.style.animationPlayState = 'paused';
-    stopButton.textContent = 'Play';
     console.log('Pausing audio');
 }
 
@@ -95,8 +92,11 @@ function hideExploreButton() {
 legendModeButton.addEventListener('click', function() {
     const legendModeText = 'The Legend is Now Began...';
     backgroundAudio.src = 'assets/musics/single_tracks/legend_mode_theme_song.mp3';
-    playAudio();
+    backgroundAudio.onloadeddata = function() {
+        playAudio();
+    };
     console.log('Legend mode button clicked, playing audio:', backgroundAudio.src);
+    typeText(legendModeText);
     legendModeButton.textContent = 'You Are Now in Legend Mode';
     classicalModeButton.textContent = 'Classical Mode'; // Reset the other button's text
     cd.src = 'assets/images/cd.png'; // Reset CD image
@@ -109,18 +109,21 @@ legendModeButton.addEventListener('click', function() {
     document.querySelector('h1').style.display = 'none';
     document.querySelectorAll('p').forEach(p => p.style.display = 'none');
     document.querySelector('img').style.display = 'none';
-    stopButton.textContent = 'Play the Video'; // Change stop button text to control video
-    stopButton.onclick = toggleVideo;// Change stop button event to control video
-    document.getElementById('stopButton').classList.remove('pulse'); // Remove pulse animation
+    videoToggleButton.style.display = 'block'; // Ensure video toggle button is visible
+    videoToggleButton.textContent = 'Play the Video'; // Change video toggle button text to control video
+    videoToggleButton.onclick = toggleVideo; // Change video toggle button event to control video
+    document.getElementById('videoToggleButton').classList.remove('pulse'); // Remove pulse animation
     exitLegendModeButton.style.display = 'block';
     exitClassicalModeButton.style.display = 'none'; // Hide classical mode exit button
     copyrightContainer.style.display = 'none'; // Hide copyright container
-}); 
+});
 
 classicalModeButton.addEventListener('click', function() {
     const classicalModeText = 'You Are Now Back to the 19th Century';
     backgroundAudio.src = 'assets/musics/full_cd/chopin_nocturnes_cd1_pollini/audio.wav';
-    playAudio();
+    backgroundAudio.onloadeddata = function() {
+        playAudio();
+    };
     console.log('Classical mode button clicked, playing audio:', backgroundAudio.src);
     typeText(classicalModeText);
     classicalModeButton.textContent = 'You Are Now in Classical Mode';
@@ -132,18 +135,11 @@ classicalModeButton.addEventListener('click', function() {
     hideExploreButton(); // Hide the explore button
     videoContainer.style.display = 'none'; // Hide video container
     legendVideo.src = ''; // Clear video source
-    document.querySelector('h1').style.display = 'block';
-    document.querySelectorAll('p').forEach(p => p.style.display = 'block');
+    document.querySelector('h1').style.display = 'none';
+    document.querySelectorAll('p').forEach(p => p.style.display = 'none');
     document.querySelector('img').style.display = 'none';
-document.getElementById('stopButton').classList.remove('pulse'); // Remove pulse animation
-    stopButton.textContent = 'Pause'; // Reset stop button text
-    stopButton.onclick = function() {
-        if (backgroundAudio.paused) {
-            playAudio();
-        } else {
-            pauseAudio();
-        }
-    };
+    document.getElementById('videoToggleButton').classList.remove('pulse'); // Remove pulse animation
+    videoToggleButton.style.display = 'none'; // Makes video toggle button invisible in Classical Mode
     exitClassicalModeButton.style.display = 'block';
     exitLegendModeButton.style.display = 'none'; // Hide legend mode exit button
     copyrightContainer.style.display = 'none'; // Hide copyright container
@@ -155,6 +151,14 @@ cd.addEventListener('click', function() {
     } else {
         pauseAudio();
     }
+});
+
+cd.addEventListener('mouseover', function() {
+    cdMessageBox.style.display = 'block';
+});
+
+cd.addEventListener('mouseout', function() {
+    cdMessageBox.style.display = 'none';
 });
 
 exploreButton.addEventListener('click', function() {
@@ -212,14 +216,6 @@ document.querySelectorAll('.music-link').forEach(link => {
     });
 });
 
-stopButton.addEventListener('click', function() {
-    if (backgroundAudio.paused) {
-        playAudio();
-    } else {
-        pauseAudio();
-    }
-});
-
 dropbtn.addEventListener('click', function() {
     if (isDropdownOpen) {
         dropdownContent.style.maxHeight = '0';
@@ -273,13 +269,6 @@ dropdownContent.addEventListener('mouseout', function() {
     }, 500); // Delay before starting to fade out
 });
 
-messageBox.addEventListener('click', function() {
-    messageBox.style.display = 'none';
-    messageBoxParagraphs.forEach(p => {
-        p.style.display = 'none';
-    });
-});
-
 document.querySelectorAll('.expandable').forEach(section => {
     section.addEventListener('click', function() {
         const musicList = this.nextElementSibling;
@@ -298,16 +287,16 @@ document.querySelectorAll('.expandable').forEach(section => {
 function toggleVideo() {
     const iframe = videoContainer.querySelector('iframe');
     let src = iframe.src;
-    if (stopButton.textContent === 'Play') {
+    if (videoToggleButton.textContent === 'Play the Video') {
         if (!src.includes('autoplay=1')) {
             src += src.includes('?') ? '&autoplay=1' : '?autoplay=1';
         }
         iframe.src = src;
-        stopButton.textContent = 'Pause';
+        videoToggleButton.textContent = 'Pause the Video';
     } else {
         src = src.replace('&autoplay=1', '').replace('?autoplay=1', '');
         iframe.src = src;
-        stopButton.textContent = 'Play the Video';
+        videoToggleButton.textContent = 'Play the Video';
     }
 }
 
@@ -329,76 +318,69 @@ function stopVideo() {
 }
 
 exitLegendModeButton.addEventListener('click', function() {
-    body.classList.remove('legend-mode-active'); // Remove legend mode class
-    body.classList.remove('hide-dropdown'); // Remove class to show dropdown content
-    videoContainer.style.display = 'none'; // Hide video container
-    stopVideo(); // Stop video playback
-    legendVideo.src = ''; // Clear video source
+    body.classList.remove('legend-mode-active');
+    body.classList.remove('hide-dropdown');
+    videoContainer.style.display = 'none';
+    stopVideo();
+    legendVideo.src = '';
     document.querySelector('h1').style.display = 'block';
     document.querySelectorAll('p').forEach(p => p.style.display = 'block');
     document.querySelector('img').style.display = 'block';
     exitLegendModeButton.style.display = 'none';
-    stopButton.textContent = 'Play'; // Reset stop button text
-    stopButton.onclick = function() {
-        if (backgroundAudio.paused) {
-            playAudio();
-        } else {
-            pauseAudio();
-        }
-    };
-    backgroundAudio.pause(); // Stop background audio
-    backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav'; // Reset to default audio
-    typeText('You are now back to the home page'); // Change typing text back
-    legendModeButton.textContent = 'Enter the Legend Mode'; // Reset legend mode button text
-    classicalModeButton.textContent = 'Classical Mode'; // Reset classical mode button text
-    cd.src = 'assets/images/cd.png'; // Reset CD image
-    cd.style.animationPlayState = 'paused'; // Stop CD animation
-    body.style.backgroundImage = 'url("assets/images/baroque_background.jpg")'; // Reset background image
-    body.classList.remove('classical-mode-active'); // Remove classical mode class
-    currentVideoIndex = 0; // Reset video index
-    resetAnimations(); // Reset animations
-    showExploreButton(); // Show the explore button
-    copyrightContainer.style.display = 'block'; // Show copyright container
+    videoToggleButton.style.display = 'none';
+    videoToggleButton.textContent = 'Play the Video'; // Corrected text
+    // Restore the video toggle functionality
+    videoToggleButton.onclick = toggleVideo;
+    backgroundAudio.pause();
+    backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav';
+    typeText('You are now back to the home page');
+    legendModeButton.textContent = 'Enter the Legend Mode';
+    classicalModeButton.textContent = 'Classical Mode';
+    cd.src = 'assets/images/cd.png';
+    cd.style.animationPlayState = 'paused';
+    body.style.backgroundImage = 'url("assets/images/new_york_city.jpg")';
+    body.classList.remove('classical-mode-active');
+    currentVideoIndex = 0;
+    resetAnimations();
+    showExploreButton();
+    copyrightContainer.style.display = 'block';
+    displayUKTime(); // Display UK time on exit
 });
 
 exitClassicalModeButton.addEventListener('click', function() {
-    body.classList.remove('classical-mode-active'); // Remove classical mode class
-    body.classList.remove('hide-dropdown'); // Remove class to show dropdown content
-    videoContainer.style.display = 'none'; // Hide video container
-    stopVideo(); // Stop video playback
-    legendVideo.src = ''; // Clear video source
+    body.classList.remove('classical-mode-active');
+    body.classList.remove('hide-dropdown');
+    videoContainer.style.display = 'none';
+    stopVideo();
+    legendVideo.src = '';
     document.querySelector('h1').style.display = 'block';
     document.querySelectorAll('p').forEach(p => p.style.display = 'block');
     document.querySelector('img').style.display = 'block';
     exitClassicalModeButton.style.display = 'none';
-document.getElementById('stopButton').classList.remove('pulse'); // Remove pulse animation
-    stopButton.textContent = 'Play'; // Reset stop button text
-    stopButton.onclick = function() {
-        if (backgroundAudio.paused) {
-            playAudio();
-        } else {
-            pauseAudio();
-        }
-    };
-    backgroundAudio.pause(); // Stop background audio
-    backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav'; // Reset to default audio
-    typeText('You Are Now Back to the Home Page'); // Change typing text back
-    legendModeButton.textContent = 'Enter the Legend Mode'; // Reset legend mode button text
-    classicalModeButton.textContent = 'Classical Mode'; // Reset classical mode button text
-    cd.src = 'assets/images/cd.png'; // Reset CD image
-    cd.style.animationPlayState = 'paused'; // Stop CD animation
-    body.style.backgroundImage = 'url("assets/images/baroque_background.jpg")'; // Reset background image
-    currentVideoIndex = 0; // Reset video index
-    resetAnimations(); // Reset animations
-    showExploreButton(); // Show the explore button
-    copyrightContainer.style.display = 'block'; // Show copyright container
+    document.getElementById('videoToggleButton').classList.remove('pulse');
+    videoToggleButton.textContent = 'Play the Video'; // Corrected text
+    // Restore the video toggle functionality
+    videoToggleButton.onclick = toggleVideo;
+    backgroundAudio.pause();
+    backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav';
+    typeText('You Are Now Back to the Home Page');
+    legendModeButton.textContent = 'Enter the Legend Mode';
+    classicalModeButton.textContent = 'Classical Mode';
+    cd.src = 'assets/images/cd.png';
+    cd.style.animationPlayState = 'paused';
+    body.style.backgroundImage = 'url("assets/images/new_york_city.jpg")';
+    currentVideoIndex = 0;
+    resetAnimations();
+    showExploreButton();
+    copyrightContainer.style.display = 'block';
+    displayUKTime(); // Display UK time on exit
 });
 
 legendVideo.addEventListener('ended', function() {
     currentVideoIndex++;
     if (currentVideoIndex < videoUrls.length) {
         legendVideo.src = videoUrls[currentVideoIndex];
-        stopButton.textContent = 'Play the Video';
+        videoToggleButton.textContent = 'Play the Video';
     } else {
         currentVideoIndex = 0;
         exitLegendModeButton.click(); // Exit legend mode when all videos are finished
@@ -411,7 +393,7 @@ videoBackground.addEventListener('ended', function() {
         videoBackground.innerHTML = `
             <iframe id="legendVideo" width="1120" height="630" src="${videoUrls[currentVideoIndex]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         `;
-        stopButton.textContent = 'Play the Video';
+        videoToggleButton.textContent = 'Play the Video';
     } else {
         currentVideoIndex = 0;
         exitLegendModeButton.click(); // Exit legend mode when all videos are finished
@@ -426,3 +408,21 @@ profileImage.addEventListener('mouseover', function() {
 profileImage.addEventListener('mouseout', function() {
     jiajuMessageBox.style.display = 'none';
 });
+
+function getUKTime() {
+    const now = new Date();
+    const options = {
+        timeZone: 'Europe/London',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: false
+    };
+    const ukTime = now.toLocaleString('en-GB', options);
+    return `Current UK Time: ${ukTime}`;
+}
+
+function displayUKTime() {
+    const ukTime = getUKTime();
+    typeText(ukTime);
+}
