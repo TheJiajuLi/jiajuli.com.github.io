@@ -269,6 +269,7 @@ document.querySelectorAll('.expandable').forEach(section => {
     });
 });
 
+
 function toggleVideo() {
     const iframe = videoContainer.querySelector('iframe');
     let src = iframe.src;
