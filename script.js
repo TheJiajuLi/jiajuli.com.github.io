@@ -35,12 +35,13 @@ const musicMapping = {
 
 // Array of video URLs
 const videoUrls = [
+    'https://www.youtube.com/watch?v=UfBytG65dow',
     'https://www.youtube.com/embed/lpMGpoxq_9U?si=U1XJ5Aszbe4o9i6_',
-    'https://www.youtube.com/embed/ne8GID6OmaI?si=XqvMiKoct3Jv-fbE',
+    'https://www.youtube.com/embed/BX1WpL2VlhM?si=6m1lGxDCmeBXeOB6',
     'https://www.youtube.com/embed/-kBnCqwSO98?si=9Vd9ML9epOkthQsI'
 ];
 
-let currentVideoIndex = 0;
+let currentVideoIndex = 3;
 
 // Function to generate the music list
 function generateMusicList() {
@@ -81,6 +82,16 @@ function pauseAudio() {
     console.log('Pausing audio');
 }
 
+// Function to show the explore button
+function showExploreButton() {
+    exploreButton.style.display = 'block';
+}
+
+// Function to hide the explore button
+function hideExploreButton() {
+    exploreButton.style.display = 'none';
+}
+
 legendModeButton.addEventListener('click', function() {
     const legendModeText = 'The Legend is Now Began...';
     backgroundAudio.src = 'assets/musics/single_tracks/legend_mode_theme_song.mp3';
@@ -91,6 +102,8 @@ legendModeButton.addEventListener('click', function() {
     cd.src = 'assets/images/cd.png'; // Reset CD image
     body.style.backgroundImage = 'url("assets/images/legend_mode_background.jpg")'; // Change background image
     body.classList.add('legend-mode-active'); // Add class to body for legend mode
+    body.classList.add('hide-dropdown'); // Add class to hide dropdown content
+    hideExploreButton(); // Hide the explore button
     videoContainer.style.display = 'block';
     legendVideo.src = videoUrls[currentVideoIndex];
     document.querySelector('h1').style.display = 'none';
@@ -98,6 +111,7 @@ legendModeButton.addEventListener('click', function() {
     document.querySelector('img').style.display = 'none';
     stopButton.textContent = 'Play the Video'; // Change stop button text to control video
     stopButton.onclick = toggleVideo; // Change stop button event to control video
+    document.getElementById('stopButton').classList.remove('pulse'); // Remove pulse animation
     exitLegendModeButton.style.display = 'block';
     exitClassicalModeButton.style.display = 'none'; // Hide classical mode exit button
     copyrightContainer.style.display = 'none'; // Hide copyright container
@@ -105,7 +119,7 @@ legendModeButton.addEventListener('click', function() {
 
 classicalModeButton.addEventListener('click', function() {
     const classicalModeText = 'You Are Now Back to the 19th Century';
-    backgroundAudio.src = 'assets/musics/single_tracks/sonata_no_8.wav';
+    backgroundAudio.src = 'assets/musics/full_cd/chopin_nocturnes_cd1_pollini/audio.wav';
     playAudio();
     console.log('Classical mode button clicked, playing audio:', backgroundAudio.src);
     typeText(classicalModeText);
@@ -114,11 +128,14 @@ classicalModeButton.addEventListener('click', function() {
     cd.src = 'assets/images/cd_classical.png'; // Change CD image
     body.style.backgroundImage = 'url("assets/images/baroque_background_2.jpg")'; // Change background image
     body.classList.add('classical-mode-active'); // Add class to body for classical mode
+    body.classList.add('hide-dropdown'); // Add class to hide dropdown content
+    hideExploreButton(); // Hide the explore button
     videoContainer.style.display = 'none'; // Hide video container
     legendVideo.src = ''; // Clear video source
     document.querySelector('h1').style.display = 'block';
     document.querySelectorAll('p').forEach(p => p.style.display = 'block');
     document.querySelector('img').style.display = 'none';
+document.getElementById('stopButton').classList.remove('pulse'); // Remove pulse animation
     stopButton.textContent = 'Pause'; // Reset stop button text
     stopButton.onclick = function() {
         if (backgroundAudio.paused) {
@@ -130,6 +147,14 @@ classicalModeButton.addEventListener('click', function() {
     exitClassicalModeButton.style.display = 'block';
     exitLegendModeButton.style.display = 'none'; // Hide legend mode exit button
     copyrightContainer.style.display = 'none'; // Hide copyright container
+});
+
+cd.addEventListener('click', function() {
+    if (backgroundAudio.paused) {
+        playAudio();
+    } else {
+        pauseAudio();
+    }
 });
 
 exploreButton.addEventListener('click', function() {
@@ -286,9 +311,28 @@ function toggleVideo() {
     }
 }
 
+function resetAnimations() {
+    body.classList.add('reset-animations');
+    setTimeout(() => {
+        body.classList.remove('reset-animations');
+    }, 10); // Adjust the delay as needed
+}
+
+// Function to stop video playback
+function stopVideo() {
+    const iframe = videoContainer.querySelector('iframe');
+    if (iframe) {
+        const src = iframe.src;
+        iframe.src = ''; // Clear the src to stop the video
+        iframe.src = src; // Reset the src to the original value
+    }
+}
+
 exitLegendModeButton.addEventListener('click', function() {
     body.classList.remove('legend-mode-active'); // Remove legend mode class
+    body.classList.remove('hide-dropdown'); // Remove class to show dropdown content
     videoContainer.style.display = 'none'; // Hide video container
+    stopVideo(); // Stop video playback
     legendVideo.src = ''; // Clear video source
     document.querySelector('h1').style.display = 'block';
     document.querySelectorAll('p').forEach(p => p.style.display = 'block');
@@ -312,17 +356,22 @@ exitLegendModeButton.addEventListener('click', function() {
     body.style.backgroundImage = 'url("assets/images/baroque_background.jpg")'; // Reset background image
     body.classList.remove('classical-mode-active'); // Remove classical mode class
     currentVideoIndex = 0; // Reset video index
+    resetAnimations(); // Reset animations
+    showExploreButton(); // Show the explore button
     copyrightContainer.style.display = 'block'; // Show copyright container
 });
 
 exitClassicalModeButton.addEventListener('click', function() {
     body.classList.remove('classical-mode-active'); // Remove classical mode class
+    body.classList.remove('hide-dropdown'); // Remove class to show dropdown content
     videoContainer.style.display = 'none'; // Hide video container
+    stopVideo(); // Stop video playback
     legendVideo.src = ''; // Clear video source
     document.querySelector('h1').style.display = 'block';
     document.querySelectorAll('p').forEach(p => p.style.display = 'block');
     document.querySelector('img').style.display = 'block';
     exitClassicalModeButton.style.display = 'none';
+document.getElementById('stopButton').classList.remove('pulse'); // Remove pulse animation
     stopButton.textContent = 'Play'; // Reset stop button text
     stopButton.onclick = function() {
         if (backgroundAudio.paused) {
@@ -340,7 +389,20 @@ exitClassicalModeButton.addEventListener('click', function() {
     cd.style.animationPlayState = 'paused'; // Stop CD animation
     body.style.backgroundImage = 'url("assets/images/baroque_background.jpg")'; // Reset background image
     currentVideoIndex = 0; // Reset video index
+    resetAnimations(); // Reset animations
+    showExploreButton(); // Show the explore button
     copyrightContainer.style.display = 'block'; // Show copyright container
+});
+
+legendVideo.addEventListener('ended', function() {
+    currentVideoIndex++;
+    if (currentVideoIndex < videoUrls.length) {
+        legendVideo.src = videoUrls[currentVideoIndex];
+        stopButton.textContent = 'Play the Video';
+    } else {
+        currentVideoIndex = 0;
+        exitLegendModeButton.click(); // Exit legend mode when all videos are finished
+    }
 });
 
 videoBackground.addEventListener('ended', function() {
