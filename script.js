@@ -66,6 +66,7 @@ window.addEventListener('load', function() {
     console.log('Default audio set on load:', backgroundAudio.src);
     generateMusicList();
     displayUKTime(); // Display UK time on load
+    setInterval(displayUKTime, 1000); // Update UK time every second
 });
 
 function playAudio() {
@@ -172,21 +173,130 @@ exploreButton.addEventListener('click', function() {
     }
 });
 
+let typingPaused = false; // Flag to track if typing is paused
+let typingActive = false; // Flag to track if typing is active
+let typingTextValue = ''; // Store the current text value
+
 function typeText(text) {
     typingText.style.display = 'block';
+    typingTextValue = text; // Store the current text value
     typingText.value = ''; // Reset text content before starting the typing animation
     let index = 0;
     clearTimeout(typingTimeout); // Clear existing timeout
+    typingActive = true; // Set typing to active
+
     function type() {
-        if (index < text.length) {
-            typingText.value += text.charAt(index);
+        if (typingActive && !typingPaused && index < typingTextValue.length) {
+            typingText.value += typingTextValue.charAt(index);
             typingText.scrollLeft = typingText.scrollWidth; // Scroll to the end of the text
             index++;
             typingTimeout = setTimeout(type, 50); // Adjust typing speed for smoother animation
+        } else if (typingActive && typingPaused) {
+            // Do nothing, just wait for the typingPaused flag to be toggled
+        } else {
+            // Typing is no longer active, clear the timeout
+            clearTimeout(typingTimeout);
         }
     }
     type();
 }
+
+document.addEventListener('click', function(event) {
+    if (typingActive && event.target !== typingText) {
+        typingPaused = false; // Resume typing if click is outside typingText
+    }
+});
+
+typingText.addEventListener('click', function(event) {
+    event.stopPropagation(); // Prevent the document click event from firing
+    if (typingActive) {
+        typingPaused = !typingPaused; // Toggle the typingPaused flag
+    }
+});
+
+typingText.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        typingActive = false; // Cancel typing if Enter is pressed
+        const inputText = typingText.value.trim().toLowerCase();
+
+        if (inputText === 'quick tour') {
+            const tourMessages = [
+                'Hello, welcome to my personal website', //1
+                'Here are some quick tips to help you play it around and winning your life!', //2
+                "So Let's get started.", //3
+                'Section 1: Acknowledgement', //4
+                'This site is built by Jiaju Li, a math student, an ex-musician and boxing hobbyist who is trying to fight against the matrix..', //5
+                "Well, I know we don't care about any of that.. so let's jump into the section 2.", //6
+                'Section 2: Functionality', //7
+                "First of all, the CD icon controls the music medias of this site.", //8
+                "You can play or pause a music media at anytime you want just by clicking it", //9
+                "Which means there's no play button at anywhere around.", //10
+                "Moreover, if you want to enjoy some classical music at anytime of your day", //11
+                "you are most welcomed to go to the music session I uniquely designed for a classical musics-friendly environment.", //12
+                "It's called 'Classical Mode.'", //13
+                "You can get access to all the repertoires I have collected before and listen to them without a charge.", //14
+                "Sounds cool, right?", //15
+                "All you need to do is by clicking the 'Enter the Classical Mode' button on the top right of the page and the dreamful musics will come.", //16
+                'The "Enter the Legend Mode" button is designed specifically for people like me who wants to fight against the social media, the matrix and keeps getting better.', //17
+                "No one on earth has ever achieved real greatness without having a solid brotherhood and a group of knowleges and powers.", //18
+                "We can fight together and win together if we have the wining-mindset and wish to become a better.", //19
+                "Andrew Tate and his team has achevied something real great.", //20
+                "So who's the next Top G gonna be?", //21
+                "Guess we' ll find out.", //22
+                "Lastly and real quickly", //23
+                "if you want to go back to the home page and do whatsoever, all you need to do is clicking the 'Back to the Home Page' at the top center, and you will be redirected to the home page.", //24
+                "That's it, I wish you enjoy it!", //25
+            ];
+
+            const tourTimeouts = [
+                4000, // Timeout for message 1
+                5500, // Timeout for message 2
+                2500, // Timeout for message 3
+                2500, // Timeout for message 4
+                9000, // Timeout for message 5
+                5500, // Timeout for message 6
+                2000, // Timeout for message 7
+                6000, // Timeout for message 8
+                6500, // Timeout for message 9
+                5000, // Timeout for message 10
+                5500, // Timeout for message 11
+                9000, // Timeout for message 12
+                4000, // Timeout for message 13
+                7500, // Timeout for message 14
+                2000, // Timeout for message 15
+                11000, // Timeout for message 16
+                10500, // Timeout for message 17
+                8500, // Timeout for message 18
+                9000, // Timeout for message 19
+                5000, // Timeout for message 20
+                5000, // Timeout for message 21
+                3000, // Timeout for message 22
+                1000, // Timeout for message 23
+                11500, // Timeout for message 24
+                15000, // Timeout for message 25
+            ];
+
+            let messageIndex = 0;
+            typingText.value = ''; // Clear the input bar
+
+            function showTourMessage() {
+                if (messageIndex < tourMessages.length) {
+                    typeText(tourMessages[messageIndex]); // Use the typeText function to display the message
+                    messageIndex++;
+                    setTimeout(showTourMessage, tourTimeouts[messageIndex - 1]); // Display each message with a delay
+                } else {
+                    typingText.placeholder = "For more information, please types a 'More' here."; // Change the placeholder text
+                }
+            }
+
+            showTourMessage();
+        } else if (inputText === 'clear') {
+            typingText.value = ''; // Clear the input bar
+        } else {
+            typeText("Command not recognized. Type 'quick tour' for a website tour.");
+        }
+    }
+});
 
 document.querySelectorAll('.preview-link').forEach(link => {
     link.addEventListener('mouseover', function(event) {
@@ -293,11 +403,16 @@ function toggleVideo() {
             src += src.includes('?') ? '&autoplay=1' : '?autoplay=1';
         }
         iframe.src = src;
-        videoToggleButton.textContent = 'Pause the Video';
+        videoToggleButton.textContent = 'Play the Next Video';
     } else {
-        src = src.replace('&autoplay=1', '').replace('?autoplay=1', '');
-        iframe.src = src;
-        videoToggleButton.textContent = 'Play the Video';
+        currentVideoIndex++;
+        if (currentVideoIndex < videoUrls.length) {
+            legendVideo.src = videoUrls[currentVideoIndex];
+            videoToggleButton.textContent = 'Play the Video';
+        } else {
+            currentVideoIndex = 0;
+            exitLegendModeButton.click(); // Exit legend mode when all videos are finished
+        }
     }
 }
 
@@ -318,7 +433,45 @@ function stopVideo() {
     }
 }
 
+function updateHomePage() {
+    typingText.classList.add('reset-animations');
+    setTimeout(() => {
+        typingText.classList.remove('reset-animations');
+    }, 10);
+    displayUKTime();
+}
+
 exitLegendModeButton.addEventListener('click', function() {
+    body.classList.remove('legend-mode-active');
+    body.classList.remove('hide-dropdown');
+    videoContainer.style.display = 'none';
+    stopVideo();
+    legendVideo.src = '';
+    document.querySelector('h1').style.display = 'block';
+    document.querySelectorAll('p').forEach(p => p.style.display = 'block');
+    document.querySelector('img').style.display = 'block';
+    exitLegendModeButton.style.display = 'none';
+    videoToggleButton.style.display = 'none';
+    videoToggleButton.textContent = 'Play the Video'; // Corrected text
+    // Restore the video toggle functionality
+    videoToggleButton.onclick = toggleVideo;
+    backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav';
+    backgroundAudio.pause();
+    legendModeButton.textContent = 'Enter the Legend Mode';
+    classicalModeButton.textContent = 'Classical Mode';
+    cd.src = 'assets/images/cd.png';
+    cd.style.animationPlayState = 'paused';
+    body.style.backgroundImage = 'url("assets/images/new_york_city.jpg")';
+    body.classList.remove('classical-mode-active');
+    currentVideoIndex = 0;
+    resetAnimations();
+    showExploreButton();
+    copyrightContainer.style.display = 'block';
+    updateHomePage(); // Call updateHomePage here!
+    setInterval(updateHomePage, 60000); // Update every minute
+});
+
+exitClassicalModeButton.addEventListener('click', function() {
     body.classList.remove('legend-mode-active');
     body.classList.remove('hide-dropdown');
     videoContainer.style.display = 'none';
@@ -345,36 +498,8 @@ exitLegendModeButton.addEventListener('click', function() {
     resetAnimations();
     showExploreButton();
     copyrightContainer.style.display = 'block';
-    displayUKTime(); // Display UK time on exit
-});
-
-exitClassicalModeButton.addEventListener('click', function() {
-    body.classList.remove('classical-mode-active');
-    body.classList.remove('hide-dropdown');
-    videoContainer.style.display = 'none';
-    stopVideo();
-    legendVideo.src = '';
-    document.querySelector('h1').style.display = 'block';
-    document.querySelectorAll('p').forEach(p => p.style.display = 'block');
-    document.querySelector('img').style.display = 'block';
-    exitClassicalModeButton.style.display = 'none';
-    document.getElementById('videoToggleButton').classList.remove('pulse');
-    videoToggleButton.textContent = 'Play the Video'; // Corrected text
-    // Restore the video toggle functionality
-    videoToggleButton.onclick = toggleVideo;
-    backgroundAudio.pause();
-    backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav';
-    typeText('You Are Now Back to the Home Page');
-    legendModeButton.textContent = 'Enter the Legend Mode';
-    classicalModeButton.textContent = 'Classical Mode';
-    cd.src = 'assets/images/cd.png';
-    cd.style.animationPlayState = 'paused';
-    body.style.backgroundImage = 'url("assets/images/new_york_city.jpg")';
-    currentVideoIndex = 0;
-    resetAnimations();
-    showExploreButton();
-    copyrightContainer.style.display = 'block';
-    displayUKTime(); // Display UK time on exit
+    updateHomePage(); // Call updateHomePage here!
+    setInterval(updateHomePage, 60000); // Update every minute
 });
 
 legendVideo.addEventListener('ended', function() {
@@ -416,89 +541,34 @@ function getUKTime() {
 }
 
 function displayUKTime() {
-    const ukTime = getUKTime();
-    typeText(ukTime);
+    const now = new Date();
+    const timeOptions = {
+        timeZone: 'Europe/London',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false
+    };
+    const timeFormatter = new Intl.DateTimeFormat('en-GB', timeOptions);
+    const time = timeFormatter.format(now);
+
+    const dateOptions = {
+        timeZone: 'Europe/London',
+        month: 'long',
+        year: 'numeric'
+    };
+    const dateFormatter = new Intl.DateTimeFormat('en-GB', dateOptions);
+    const date = dateFormatter.format(now);
+
+    const formattedTime = `Current UK Time: ${time}`;
+    const formattedDate = `${date}`;
+    typeText(`${formattedTime} ${formattedDate}`); // Call typeText here!
 }
 
-typingText.addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-        const inputText = typingText.value.trim().toLowerCase();
+// Initialize UK time on page load
+window.addEventListener('load', function() {    backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav';    console.log('Default audio set on load:', backgroundAudio.src);    generateMusicList();    displayUKTime(); // Display UK time on load
+    setInterval(displayUKTime, 1000); // Update UK time every second
+});
 
-        if (inputText === 'quick tour') {
-            const tourMessages = [
-                'Hello, welcome to my personal website', //1
-                'Here are some quick tips to help you play it around and winning your life!', //2
-                "So Let's get started.", //3
-                'Section 1: Acknowledgement', //4
-                'This site is built by Jiaju Li, a math student, an ex-musician and boxing hobbyist who is trying to fight against the matrix..', //5
-                "Well, I know we don't care about any of that.. so let's jump into the section 2.", //6
-                'Section 2: Functionality', //7
-                "First of all, the CD icon controls the music medias of this site.", //8
-                "You can play or pause a music media at anytime you want just by clicking it", //9
-                "Which means there's no play button at anywhere around.", //10
-                "Moreover, if you want to enjoy some classical music at anytime of your day", //11
-                "you are most welcomed to go to the music session I uniquely designed for a classical musics-friendly environment.", //12
-                "It's called 'Classical Mode.'", //13
-                "You can get access to all the repertoires I have collected before and listen to them without a charge.", //14
-                "Sounds cool, right?", //15
-                "All you need to do is by clicking the 'Enter the Classical Mode' button on the top right of the page and the dreamful musics will come.", //16
-                'The "Enter the Legend Mode" button is designed specifically for people like me who wants to fight against the social media, the matrix and keeps getting better.', //17
-                "No one on earth has ever achieved real greatness without having a solid brotherhood and a group of knowleges and powers.", //18
-                "We can fight together and win together if we have the wining-mindset and wish to become a better.", //19
-                "Andrew Tate and his team has achevied something real great.", //20
-                "So who's the next Top G gonna be?", //21
-                "Guess we' ll find out.", //22
-                "Lastly and real quickly", //23
-                "if you want to go back to the home page and do whatsoever, all you need to do is clicking the 'Back to the Home Page' at the top center, and you will be redirected to the home page.", //24
-                "That's it, I wish you enjoy it!", //25
-            ];
-
-            const tourTimeouts = [
-                4000, // Timeout for message 1
-                5500, // Timeout for message 2
-                2500, // Timeout for message 3
-                2500, // Timeout for message 4
-                9000, // Timeout for message 5
-                5500, // Timeout for message 6
-                2000, // Timeout for message 7
-                6000, // Timeout for message 8
-                6500, // Timeout for message 9
-                5000, // Timeout for message 10
-                5500, // Timeout for message 11
-                9000, // Timeout for message 12
-                4000, // Timeout for message 13
-                7500, // Timeout for message 14
-                2000, // Timeout for message 15
-                11000, // Timeout for message 16
-                10500, // Timeout for message 17
-                8500, // Timeout for message 18
-                9000, // Timeout for message 19
-                5000, // Timeout for message 20
-                5000, // Timeout for message 21
-                3000, // Timeout for message 22
-                1000, // Timeout for message 23
-                11500, // Timeout for message 24
-                15000, // Timeout for message 25
-            ];
-
-            let messageIndex = 0;
-            typingText.value = ''; // Clear the input bar
-
-            function showTourMessage() {
-                if (messageIndex < tourMessages.length) {
-                    typeText(tourMessages[messageIndex]); // Use the typeText function to display the message
-                    messageIndex++;
-                    setTimeout(showTourMessage, tourTimeouts[messageIndex - 1]); // Display each message with a delay
-                } else {
-                    typingText.placeholder = "For more information, please types a 'More' here."; // Change the placeholder text
-                }
-            }
-
-            showTourMessage();
-        } else if (inputText === 'clear') {
-            typingText.value = ''; // Clear the input bar
-        } else {
-            typeText("Command not recognized. Type 'quick tour' for a website tour.");
-        }
-    }
+profileImage.addEventListener('mouseover', function() {
+    typeText('Jiaju Li at O2, InterContinental, Canary Wharf, London Feb 2025');
 });
