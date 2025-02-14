@@ -455,7 +455,6 @@ exitLegendModeButton.addEventListener('click', function() {
     videoToggleButton.textContent = 'Play the Video'; // Corrected text
     // Restore the video toggle functionality
     videoToggleButton.onclick = toggleVideo;
-    backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav';
     backgroundAudio.pause();
     legendModeButton.textContent = 'Enter the Legend Mode';
     classicalModeButton.textContent = 'Classical Mode';
@@ -486,7 +485,6 @@ exitClassicalModeButton.addEventListener('click', function() {
     // Restore the video toggle functionality
     videoToggleButton.onclick = toggleVideo;
     backgroundAudio.pause();
-    backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav';
     typeText('You are now back to the home page');
     legendModeButton.textContent = 'Enter the Legend Mode';
     classicalModeButton.textContent = 'Classical Mode';

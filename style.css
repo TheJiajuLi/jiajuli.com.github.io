@@ -1,3 +1,4 @@
+/* General Styles */
 body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     margin: 0;
@@ -306,7 +307,7 @@ button:hover {
     border-radius: 5px;
     cursor: pointer;
     font-size: 12px; /* Increase font size for better readability on mobile */
-    animation: fadeIn 2s ease-in-out;
+    animation: pulse 2s infinite; /* Apply the pulse animation */
 }
 
 .stop-button:hover {
@@ -553,5 +554,212 @@ body.legend-mode-active .video-control-button {
     width: 1230px;
     height: 580px;
     opacity: 0.8; /* Make the iframe semi-transparent */
+}
+
+.exit-mode-button {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.exit-mode-button:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.exit-legend-mode-button {
+    display: none;
+}
+
+.exit-classical-mode-button {
+    display: none;
+}
+
+body.legend-mode-active .exit-legend-mode-button {
+    display: block;
+}
+
+body.classical-mode-active .exit-classical-mode-button {
+    display: block;
+}
+
+.exit-mode-button {
+    position: absolute;
+    text-align: center;
+    margin-top: 27px;
+    left: 50%;
+    font-size: 0.7em;
+    width: 25%;
+    box-sizing: border-box;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    animation: fadeIn 2s ease-in-out;
+}
+
+/* Media Queries for Mobile Devices */
+@media (max-width: 768px) {
+    body {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-top: 20px;
+    }
+
+    p {
+        font-size: 1em;
+        margin: 10px 0;
+    }
+
+    img {
+        position: static;
+        width: 80px;
+        height: 80px;
+        margin: 20px auto; /* Center the image */
+    }
+
+    .cd-container {
+        position: static;
+        margin: 20px 0;
+    }
+
+    .cd {
+        position: static;
+        margin: 0;
+        top: auto;
+        left: auto;
+    }
+
+    .legend-mode-button,
+    .classical-mode-button {
+        position: static;
+        margin-top: 10px;
+        padding: 10px 20px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .video-background iframe {
+        width: 100%;
+        max-height: 200px;
+    }
+
+    .dropdown {
+        position: static;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .dropbtn {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .dropdown-content {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .message-box {
+        position: static;
+        width: 100%;
+        margin-top: 10px;
+        box-sizing: border-box;
+    }
+
+    .copyright-container {
+        position: static;
+        margin-top: 20px;
+        box-sizing: border-box;
+    }
+
+    .exit-legend-mode-button,
+    .exit-classical-mode-button {
+        position: static;
+        margin-top: 10px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .typing-text {
+        position: static;
+        width: 100%;
+        margin-top: 10px;
+        box-sizing: border-box;
+    }
+
+    .stop-button {
+        position: static;
+        margin-top: 10px;
+    }
+
+    .video-container {
+        position: static;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .video-container iframe {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+    }
+
+    /* Flexbox for main content */
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Align items to the top */
+        min-height: 100vh;
+    }
+
+    /* Grid for buttons */
+    .legend-mode-button,
+    .classical-mode-button {
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+    }
+
+    /* Adjustments for specific elements */
+    .cd-container {
+        margin: 20px 0;
+    }
+
+    .typing-text {
+        width: 100%;
+        text-align: center;
+    }
+
+    .copyright-container {
+        position: static;
+        margin-top: 20px;
+    }
+
+    .exit-mode-button {
+        position: absolute;
+        text-align: center;
+        margin-top: 70px;
+        left: 50%;
+        width: 35%;
+        font-size: 0.7em;
+        box-sizing: border-box;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
 }
 
