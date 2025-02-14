@@ -38,7 +38,7 @@ h1 {
     color: #ffffff;
     font-size: 3em;
     margin-top: 0; /* Adjust margin to move content up */
-    animation: fadeIn 2s ease-in-out;
+    animation: breath 5s ease-in-out infinite, fadeIn 2s ease-in-out; /* Apply both animations */
 }
 
 p {
@@ -173,6 +173,15 @@ button:hover {
 .special-link {
     color: #ffffff; /* White color for the link */
     text-decoration: none; /* Optional: Remove underline */
+}
+
+.special-link:hover {
+    color: #007BFF; /* Blue color on hover */
+}
+
+/* New style for the specific LinkedIn link */
+.copyright-container a[href="https://www.linkedin.com/in/jiaju-li-631616344/"] {
+    color: #ff4500; /* Red color for the LinkedIn link */
 }
 
 .special-link:hover {
@@ -698,4 +707,15 @@ body.reset-animations * {
 
 .play-button:hover {
     background-color: #1e90ff;
+}
+
+@keyframes breath {
+    0% { opacity: 0.6; } /* Fainter */
+    50% { opacity: 1; }   /* Full opacity */
+    100% { opacity: 0.6; } /* Fainter */
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
 }

@@ -17,6 +17,7 @@ let musicList = document.getElementById('musicList');
 let body = document.querySelector('body');
 let videoContainer = document.getElementById('videoContainer');
 let legendVideo = document.getElementById('legendVideo');
+let videoBackground = document.getElementById('videoBackground'); // Add this line
 let exitLegendModeButton = document.getElementById('exitLegendModeButton');
 let exitClassicalModeButton = document.getElementById('exitClassicalModeButton');
 let cdContainer = document.getElementById('cdContainer');
@@ -391,7 +392,7 @@ videoBackground.addEventListener('ended', function() {
     currentVideoIndex++;
     if (currentVideoIndex < videoUrls.length) {
         videoBackground.innerHTML = `
-            <iframe id="legendVideo" width="1120" height="630" src="${videoUrls[currentVideoIndex]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            <iframe id="legendVideo" width="1160" height="630" src="${videoUrls[currentVideoIndex]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         `;
         videoToggleButton.textContent = 'Play the Video';
     } else {
@@ -400,14 +401,6 @@ videoBackground.addEventListener('ended', function() {
     }
 });
 
-// Add event listeners for profile image hover
-profileImage.addEventListener('mouseover', function() {
-    jiajuMessageBox.style.display = 'block';
-});
-
-profileImage.addEventListener('mouseout', function() {
-    jiajuMessageBox.style.display = 'none';
-});
 
 function getUKTime() {
     const now = new Date();
@@ -426,3 +419,86 @@ function displayUKTime() {
     const ukTime = getUKTime();
     typeText(ukTime);
 }
+
+typingText.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        const inputText = typingText.value.trim().toLowerCase();
+
+        if (inputText === 'quick tour') {
+            const tourMessages = [
+                'Hello, welcome to my personal website', //1
+                'Here are some quick tips to help you play it around and winning your life!', //2
+                "So Let's get started.", //3
+                'Section 1: Acknowledgement', //4
+                'This site is built by Jiaju Li, a math student, an ex-musician and boxing hobbyist who is trying to fight against the matrix..', //5
+                "Well, I know we don't care about any of that.. so let's jump into the section 2.", //6
+                'Section 2: Functionality', //7
+                "First of all, the CD icon controls the music medias of this site.", //8
+                "You can play or pause a music media at anytime you want just by clicking it", //9
+                "Which means there's no play button at anywhere around.", //10
+                "Moreover, if you want to enjoy some classical music at anytime of your day", //11
+                "you are most welcomed to go to the music session I uniquely designed for a classical musics-friendly environment.", //12
+                "It's called 'Classical Mode.'", //13
+                "You can get access to all the repertoires I have collected before and listen to them without a charge.", //14
+                "Sounds cool, right?", //15
+                "All you need to do is by clicking the 'Enter the Classical Mode' button on the top right of the page and the dreamful musics will come.", //16
+                'The "Enter the Legend Mode" button is designed specifically for people like me who wants to fight against the social media, the matrix and keeps getting better.', //17
+                "No one on earth has ever achieved real greatness without having a solid brotherhood and a group of knowleges and powers.", //18
+                "We can fight together and win together if we have the wining-mindset and wish to become a better.", //19
+                "Andrew Tate and his team has achevied something real great.", //20
+                "So who's the next Top G gonna be?", //21
+                "Guess we' ll find out.", //22
+                "Lastly and real quickly", //23
+                "if you want to go back to the home page and do whatsoever, all you need to do is clicking the 'Back to the Home Page' at the top center, and you will be redirected to the home page.", //24
+                "That's it, I wish you enjoy it!", //25
+            ];
+
+            const tourTimeouts = [
+                4000, // Timeout for message 1
+                5500, // Timeout for message 2
+                2500, // Timeout for message 3
+                2500, // Timeout for message 4
+                9000, // Timeout for message 5
+                5500, // Timeout for message 6
+                2000, // Timeout for message 7
+                6000, // Timeout for message 8
+                6500, // Timeout for message 9
+                5000, // Timeout for message 10
+                5500, // Timeout for message 11
+                9000, // Timeout for message 12
+                4000, // Timeout for message 13
+                7500, // Timeout for message 14
+                2000, // Timeout for message 15
+                11000, // Timeout for message 16
+                10500, // Timeout for message 17
+                8500, // Timeout for message 18
+                9000, // Timeout for message 19
+                5000, // Timeout for message 20
+                5000, // Timeout for message 21
+                3000, // Timeout for message 22
+                1000, // Timeout for message 23
+                11500, // Timeout for message 24
+                15000, // Timeout for message 25
+            ];
+
+            let messageIndex = 0;
+            typingText.value = ''; // Clear the input bar
+
+            function showTourMessage() {
+                if (messageIndex < tourMessages.length) {
+                    typeText(tourMessages[messageIndex]); // Use the typeText function to display the message
+                    messageIndex++;
+                    setTimeout(showTourMessage, tourTimeouts[messageIndex - 1]); // Display each message with a delay
+                } else {
+                    typingText.placeholder = "For more information, please types a 'More' here."; // Change the placeholder text
+                }
+            }
+
+            showTourMessage();
+        } else if (inputText === 'clear') {
+            typingText.value = ''; // Clear the input bar
+        } else {
+            typeText("Command not recognized. Type 'quick tour' for a website tour.");
+        }
+    }
+});

@@ -13,7 +13,7 @@
     <h1>Jiaju's Webpage</h1>
     <p>Hi, welcome to my personal website!</p>
         </div>
-        <img src="assets/images/jiaju_li.jpg" alt="Jiaju Li at Canary Wharf, London">
+        <img src="assets/images/jiaju_li.jpg" alt="Jiaju Li at Canary Wharf, London" id="profileImage">
         <div class="cd-container">
             <img src="assets/images/cd.png" alt="CD" id="cd" class="cd">
         </div>
@@ -21,10 +21,12 @@
     <audio id="backgroundAudio" controls style="display: none;"></audio>
     <button id="legendModeButton" class="legend-mode-button">Enter the Legend Mode</button>
     <button id="ClassicalModeButton" class="classical-mode-button">Enter the Classical Mode</button>
-    <input type="text" id="typingText" class="typing-text" placeholder="Type something here...">
+    <input type="text" id="typingText" class="typing-text" placeholder="Type 'quick tour' to get started">
     <div id="videoContainer" style="display:none;">
-        <button id="videoToggleButton" style="display:block;">Play the Video</button>
-        <iframe id="legendVideo" width="1120" height="630" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <div id="videoBackground">
+            <button id="videoToggleButton" style="display:block;">Play the Video</button>
+            <iframe id="legendVideo" width="1120" height="630" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
     </div>
     <button id="exitLegendModeButton" class="exit-legend-mode-button" style="display: none;">Back to the Home Page</button>
     <button id="exitClassicalModeButton" class="exit-classical-mode-button" style="display: none;">Back to the Home Page</button>
