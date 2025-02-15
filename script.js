@@ -3,8 +3,6 @@ let cd = document.getElementById("cd");
 let videoToggleButton = document.getElementById("videoToggleButton"); // Renamed from stopButton
 let backgroundAudio = document.getElementById('backgroundAudio');
 let messageBox = document.getElementById('music-intro');
-let messageBoxParagraphs = messageBox.querySelectorAll('p');
-let messageBoxTimeout;
 let dropdownContent = document.querySelector('.dropdown-content');
 let dropbtn = document.querySelector('.dropbtn');
 let isDropdownOpen = false;
@@ -13,7 +11,7 @@ let classicalModeButton = document.getElementById('ClassicalModeButton');
 let typingText = document.getElementById('typingText');
 let exploreButton = document.getElementById('exploreButton');
 let typingTimeout;
-let musicList = document.getElementById('musicList');
+let musicListElement = document.querySelector('.music-list'); // Corrected selector
 let body = document.querySelector('body');
 let videoContainer = document.getElementById('videoContainer');
 let legendVideo = document.getElementById('legendVideo');
@@ -22,8 +20,48 @@ let exitLegendModeButton = document.getElementById('exitLegendModeButton');
 let exitClassicalModeButton = document.getElementById('exitClassicalModeButton');
 let cdContainer = document.getElementById('cdContainer');
 let copyrightContainer = document.querySelector('.copyright-container');
-let profileImage = document.getElementById('jiaju_li');
+let jiajuImage = document.getElementById('jiaju_li');
 let jiajuMessageBox = document.getElementById('jiaju.jpg');
+let isMobileView = false;
+const viewSwitchButton = document.getElementById('viewSwitchButton');
+const stylesheetLink = document.getElementById('stylesheet');
+const profileImage = document.getElementById('profileImage'); // Get the profile image
+
+if (viewSwitchButton) {
+    viewSwitchButton.addEventListener('click', () => {
+        const img = viewSwitchButton.querySelector('img');
+        if (isMobileView) {
+            stylesheetLink.href = 'style.css';
+            img.src = 'assets/images/mobile_view.png';
+            img.alt = 'Mobile View';
+        } else {
+            stylesheetLink.href = 'style-mobile.css';
+            img.src = 'assets/images/desktop_view.png';
+            img.alt = 'Desktop View';
+        }
+        isMobileView = !isMobileView;
+
+        // Add fadeIn animation to the profile image
+        profileImage.classList.add('fade-in');
+        setTimeout(() => {
+            profileImage.classList.remove('fade-in');
+        }, 2000); // Remove the class after 2 seconds
+    });
+} else {
+    console.error('viewSwitchButton not found in the document');
+}
+
+// Add event listeners to the music-list class
+const musicLists = document.querySelectorAll('.music-list');
+musicLists.forEach(musicList => {
+    musicList.addEventListener('mouseover', () => {
+        typeText("These are some of my piano recordings when I was in 21");
+    });
+
+    musicList.addEventListener('mouseout', () => {
+        typeText(""); // Clear the typing text when mouse leaves
+    });
+});
 
 // Mapping of file paths to display names
 const musicMapping = {
@@ -100,7 +138,7 @@ legendModeButton.addEventListener('click', function() {
     console.log('Legend mode button clicked, playing audio:', backgroundAudio.src);
     typeText(legendModeText);
     legendModeButton.textContent = 'You Are Now in Legend Mode';
-    classicalModeButton.textContent = 'Classical Mode'; // Reset the other button's text
+    classicalModeButton.textContent = 'Enter the Classical Mode'; // Reset the other button's text
     cd.src = 'assets/images/cd.png'; // Reset CD image
     body.style.backgroundImage = 'url("assets/images/legend_mode_background.jpg")'; // Change background image
     body.classList.add('legend-mode-active'); // Add class to body for legend mode
@@ -110,7 +148,10 @@ legendModeButton.addEventListener('click', function() {
     legendVideo.src = videoUrls[currentVideoIndex];
     document.querySelector('h1').style.display = 'none';
     document.querySelectorAll('p').forEach(p => p.style.display = 'none');
-    document.querySelector('img').style.display = 'none';
+    // Hide only the profile image (jiaju_li.jpg)
+    if (profileImage) {
+        profileImage.style.display = 'none';
+    }
     videoToggleButton.style.display = 'block'; // Ensure video toggle button is visible
     videoToggleButton.textContent = 'Play the Video'; // Change video toggle button text to control video
     videoToggleButton.onclick = toggleVideo; // Change video toggle button event to control video
@@ -139,7 +180,10 @@ classicalModeButton.addEventListener('click', function() {
     legendVideo.src = ''; // Clear video source
     document.querySelector('h1').style.display = 'none';
     document.querySelectorAll('p').forEach(p => p.style.display = 'none');
-    document.querySelector('img').style.display = 'none';
+    // Hide only the profile image (jiaju_li.jpg)
+    if (profileImage) {
+        profileImage.style.display = 'none';
+    }
     document.getElementById('videoToggleButton').classList.remove('pulse'); // Remove pulse animation
     videoToggleButton.style.display = 'none'; // Makes video toggle button invisible in Classical Mode
     exitClassicalModeButton.style.display = 'block';
@@ -323,7 +367,7 @@ document.querySelectorAll('.music-link').forEach(link => {
         backgroundAudio.src = musicUrl;
         playAudio();
         typeText(`Now Playing: ${displayName}`);
-        console.log('Music link clicked, playing audio:', backgroundAudio.src);
+        console.log('Playing audio:', backgroundAudio.src);
     });
 });
 
@@ -335,49 +379,6 @@ dropbtn.addEventListener('click', function() {
         dropdownContent.style.maxHeight = dropdownContent.scrollHeight + 'px';
         isDropdownOpen = true;
     }
-});
-
-dropbtn.addEventListener('mouseover', function() {
-    clearTimeout(messageBoxTimeout);
-    messageBox.style.display = 'block';
-    messageBox.classList.remove('fade-out');
-    messageBoxParagraphs.forEach((p, index) => {
-        setTimeout(() => {
-            p.style.display = 'block';
-        }, index * 500);
-    });
-});
-
-dropbtn.addEventListener('mouseout', function() {
-    messageBoxTimeout = setTimeout(() => {
-        messageBox.classList.add('fade-out');
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-            messageBoxParagraphs.forEach(p => {
-                p.style.display = 'none';
-            });
-        }, 2000);
-    }, 500); // Delay before starting to fade out
-});
-
-dropdownContent.addEventListener('mouseover', function() {
-    clearTimeout(messageBoxTimeout);
-    messageBox.style.display = 'none';
-    messageBoxParagraphs.forEach(p => {
-        p.style.display = 'none';
-    });
-});
-
-dropdownContent.addEventListener('mouseout', function() {
-    messageBoxTimeout = setTimeout(() => {
-        messageBox.classList.add('fade-out');
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-            messageBoxParagraphs.forEach(p => {
-                p.style.display = 'none';
-            });
-        }, 2000);
-    }, 500); // Delay before starting to fade out
 });
 
 document.querySelectorAll('.expandable').forEach(section => {
@@ -393,7 +394,6 @@ document.querySelectorAll('.expandable').forEach(section => {
         }
     });
 });
-
 
 function toggleVideo() {
     const iframe = videoContainer.querySelector('iframe');
@@ -449,8 +449,12 @@ exitLegendModeButton.addEventListener('click', function() {
     legendVideo.src = '';
     document.querySelector('h1').style.display = 'block';
     document.querySelectorAll('p').forEach(p => p.style.display = 'block');
-    document.querySelector('img').style.display = 'block';
+    // Hide only the profile image (jiaju_li.jpg)
+    if (profileImage) {
+        profileImage.style.display = 'block';
+    }
     exitLegendModeButton.style.display = 'none';
+    exitClassicalModeButton.style.display = 'none';
     videoToggleButton.style.display = 'none';
     videoToggleButton.textContent = 'Play the Video'; // Corrected text
     // Restore the video toggle functionality
@@ -478,8 +482,12 @@ exitClassicalModeButton.addEventListener('click', function() {
     legendVideo.src = '';
     document.querySelector('h1').style.display = 'block';
     document.querySelectorAll('p').forEach(p => p.style.display = 'block');
-    document.querySelector('img').style.display = 'block';
+    // Hide only the profile image (jiaju_li.jpg)
+    if (profileImage) {
+        profileImage.style.display = 'block';
+    }
     exitLegendModeButton.style.display = 'none';
+    exitClassicalModeButton.style.display = 'none';
     videoToggleButton.style.display = 'none';
     videoToggleButton.textContent = 'Play the Video'; // Corrected text
     // Restore the video toggle functionality
@@ -561,12 +569,3 @@ function displayUKTime() {
     const formattedDate = `${date}`;
     typeText(`${formattedTime} ${formattedDate}`); // Call typeText here!
 }
-
-// Initialize UK time on page load
-window.addEventListener('load', function() {    backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav';    console.log('Default audio set on load:', backgroundAudio.src);    generateMusicList();    displayUKTime(); // Display UK time on load
-    setInterval(displayUKTime, 1000); // Update UK time every second
-});
-
-profileImage.addEventListener('mouseover', function() {
-    typeText('Jiaju Li at O2, InterContinental, Canary Wharf, London Feb 2025');
-});

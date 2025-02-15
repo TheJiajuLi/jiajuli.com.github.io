@@ -1,4 +1,3 @@
-/* General Styles */
 body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     margin: 0;
@@ -13,7 +12,7 @@ body {
     min-height: 100vh; /* Ensure the background covers the entire viewport height */
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Align items to the top */
     align-items: center;
     transition: background-image 1s ease-in-out; /* Smooth transition for background image */
 }
@@ -34,31 +33,42 @@ body::before {
     z-index: -1;
 }
 
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
 h1 {
     text-align: center;
     color: #ffffff;
-    font-size: 3em;
-    margin-top: 0; /* Adjust margin to move content up */
+    font-size: 2em;
+    margin-top: 20px;
     animation: breath 5s ease-in-out infinite, fadeIn 2s ease-in-out; /* Apply both animations */
 }
 
 p {
     color: #ffffff;
-    font-size: 1.2em;
+    font-size: 1em;
     margin: 10px 0;
     animation: fadeIn 2s ease-in-out;
 }
 
-img {
-    border-radius: 50%;
-    position: absolute;
-    margin: 20px 0;
-    top: 1%;
-    left: 77%;
-    width: 50px;
+#profileImage {
+    position: fixed;
+    top: 3%;
+    left: 80%;
+    border-radius: 100%;
+    vertical-align: middle;
+    margin-right: 20px; /* Adjust spacing as needed */
+    width: 50px; /* Set a fixed width for the profile image */
     height: 50px;
-    animation: fadeIn 2s ease-in-out;
-    cursor: pointer;
+    z-index: 1000;
 }
 
 ul {
@@ -81,17 +91,6 @@ a:hover {
     text-decoration: underline;
 }
 
-button {
-    margin: 10px;
-    padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
 button:hover {
     background-color: #0056b3;
 }
@@ -103,16 +102,6 @@ button:hover {
     to {
         opacity: 1;
     }
-}
-
-#preview-container {
-    display: none;
-    position: absolute;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    padding: 10px;
-    border-radius: 5px;
-    z-index: 1000;
 }
 
 .message-box {
@@ -165,10 +154,16 @@ button:hover {
     text-align: center;
     position: fixed;
     bottom: 0;
+    left: 0;
     width: 100%;
     height: 50px;
     color: white;
     background-color: rgba(0, 0, 0, 0.8); /* Optional: Add background color */
+}
+
+/* New style for the specific LinkedIn link */
+.copyright-container a[href="https://www.linkedin.com/in/jiaju-li-631616344/"] {
+    color: #ff4500; /* Red color for the LinkedIn link */
 }
 
 .special-link {
@@ -180,18 +175,13 @@ button:hover {
     color: #007BFF; /* Blue color on hover */
 }
 
-/* New style for the specific LinkedIn link */
-.copyright-container a[href="https://www.linkedin.com/in/jiaju-li-631616344/"] {
-    color: #ff4500; /* Red color for the LinkedIn link */
-}
-
 .special-link:hover {
     color: #007BFF; /* Blue color on hover */
 }
 
 .dropdown {
     position: absolute;
-    top: 10px;
+    top: 20px;
     left: 20px;
     animation: fadeIn 2s ease-in-out;
 }
@@ -199,13 +189,13 @@ button:hover {
 .dropbtn {
     background-color: #007BFF;
     color: white;
-    padding: 16px;
-    font-size: 16px;
+    padding: 10px;
+    font-size: 12px;
     border: none;
     cursor: pointer;
     border-radius: 5px;
     margin-top: 10px;
-    width: 200px; /* Ensure all buttons have the same width */
+    width: 120px; /* Ensure all buttons have the same width */
 }
 
 .dropdown-content {
@@ -275,43 +265,25 @@ button:hover {
 
 .cd-container {
     position: fixed;
-    top: 1%;
-    left: 58%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 200px;
-    height: auto;
-    margin-left: 20px;
+    top: 3%;
+    left: 67%;
+    display: inline-block;
+    vertical-align: middle;
+    width: 50px; /* Set a fixed width for the CD container */
+    height: 50px; /* Set a fixed height for the CD container */
     animation: fadeIn 2s ease-in-out;
 }
 
 .cd {
     border-width: 50%;
     position: absolute;
-    margin: 20px 0;
-    top: 1%;
-    left: 77%;
+    width: 100%; /* Make the CD image fill the container */
+    height: 100%; /* Make the CD image fill the container */
+    border-radius: 50%;
+    object-fit: cover; /* Ensure the image fills the container without stretching */
     animation: spin 2s linear infinite;
     animation-play-state: paused; /* Start paused */
     transition: background-image 1s ease-in-out; /* Smooth transition for CD image */
-}
-
-.stop-button {
-    top: 12%;
-    padding: 10px 10px; /* Increase padding for better touch targets on mobile */
-    background-color: #ff0000;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 12px; /* Increase font size for better readability on mobile */
-    animation: pulse 2s infinite; /* Apply the pulse animation */
-}
-
-.stop-button:hover {
-    background-color: #cc0000;
 }
 
 @keyframes spin {
@@ -325,9 +297,10 @@ button:hover {
 
 .legend-mode-button,
 .classical-mode-button{
-    position: fixed;
-    top: 10px;
-    right: 10px;
+    position: static;
+    margin-top: 15px;
+    top: 90px;
+    left: 50%;
     padding: 5px 10px;
     background-color: #ff4500;
     color: white;
@@ -339,7 +312,7 @@ button:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s;
     animation: pulse 5s infinite;
-    width: 200px; /* Ensure both buttons have the same width */
+    width: 195px; /* Ensure both buttons have the same width */
 }
 
 .classical-mode-button {
@@ -366,9 +339,8 @@ button:hover {
 }
 
 .typing-text {
-    position: fixed;
-    top: 106px;
-    left: 82.5%;
+    position: static;           /* Allow the element to flow with the content */
+    margin: 15px auto;          /* Center horizontally and add spacing at the top */
     padding: 5px 10px;
     background-color: rgba(0, 0, 0, 0.8);
     color: white;
@@ -377,8 +349,8 @@ button:hover {
     cursor: pointer;
     font-size: 12px;
     font-weight: bold;
+    text-align: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s;
     width: 180px;
     animation: fadeIn 2s ease-in-out;
 }
@@ -466,7 +438,8 @@ body.legend-mode-active .video-background {
     display: none; /* Hide by default */
     position: absolute;
     bottom: 20px;
-    left: 50%;
+    top: 3%;
+    left: 6%;
     transform: translateX(-50%);
     padding: 10px 20px;
     font-size: 16px;
@@ -486,290 +459,34 @@ body.legend-mode-active .video-control-button {
     display: block; /* Show when legend mode is active */
 }
 
-.exit-legend-mode-button {
-    position: fixed;
-    top: 5%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 10px 20px;
-    font-size: 16px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 1;
+body {
+    padding: 20px;
 }
 
-.exit-legend-mode-button:hover {
-    background-color: rgba(0, 0, 0, 0.9);
-}
-
-.exit-classical-mode-button {
-    position: fixed;
-    top: 5%;
-    right: 50%;
-    transform: translate(50%, -50%);
-    padding: 10px 20px;
-    font-size: 16px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 1;
-}
-
-.exit-classical-mode-button:hover {
-    background-color: rgba(0, 0, 0, 0.9);
-}
-
-.stop-button {
-    position: fixed;
-    top: 3.4%;
-    left: 60%;
-    padding: 5px 10px;
-    background-color: #ff0000;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    animation: pulse 2s infinite; /* Apply the pulse animation */
-}
-
-.stop-button:hover {
-    background-color: #cc0000;
+.video-background iframe {
+    width: 100%;
+    max-height: 200px;
 }
 
 .video-container {
-    position: fixed;
-    top: 60.7%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    display: none;
+    position: static;
+    width: 100%;
+    margin-top: 10px;
 }
 
 .video-container iframe {
-    width: 1230px;
-    height: 580px;
-    opacity: 0.8; /* Make the iframe semi-transparent */
-}
-
-.exit-mode-button {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    font-size: 16px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 1;
-}
-
-.exit-mode-button:hover {
-    background-color: rgba(0, 0, 0, 0.9);
-}
-
-.exit-legend-mode-button {
-    display: none;
-}
-
-.exit-classical-mode-button {
-    display: none;
-}
-
-body.legend-mode-active .exit-legend-mode-button {
-    display: block;
-}
-
-body.classical-mode-active .exit-classical-mode-button {
-    display: block;
-}
-
-.exit-mode-button {
-    position: absolute;
-    text-align: center;
-    margin-top: 27px;
-    left: 50%;
-    font-size: 0.7em;
-    width: 25%;
-    box-sizing: border-box;
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-    animation: fadeIn 2s ease-in-out;
-}
-
-/* Media Queries for Mobile Devices */
-@media (max-width: 768px) {
-    body {
-        padding: 20px;
-    }
-
-    h1 {
-        font-size: 2em;
-        margin-top: 20px;
-    }
-
-    p {
-        font-size: 1em;
-        margin: 10px 0;
-    }
-
-    img {
-        position: static;
-        width: 80px;
-        height: 80px;
-        margin: 20px auto; /* Center the image */
-    }
-
-    .cd-container {
-        position: static;
-        margin: 20px 0;
-    }
-
-    .cd {
-        position: static;
-        margin: 0;
-        top: auto;
-        left: auto;
-    }
-
-    .legend-mode-button,
-    .classical-mode-button {
-        position: static;
-        margin-top: 10px;
-        padding: 10px 20px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .video-background iframe {
-        width: 100%;
-        max-height: 200px;
-    }
-
-    .dropdown {
-        position: static;
-        width: 100%;
-        margin-top: 10px;
-    }
-
-    .dropbtn {
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .dropdown-content {
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .message-box {
-        position: static;
-        width: 100%;
-        margin-top: 10px;
-        box-sizing: border-box;
-    }
-
-    .copyright-container {
-        position: static;
-        margin-top: 20px;
-        box-sizing: border-box;
-    }
-
-    .exit-legend-mode-button,
-    .exit-classical-mode-button {
-        position: static;
-        margin-top: 10px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .typing-text {
-        position: static;
-        width: 100%;
-        margin-top: 10px;
-        box-sizing: border-box;
-    }
-
-    .stop-button {
-        position: static;
-        margin-top: 10px;
-    }
-
-    .video-container {
-        position: static;
-        width: 100%;
-        margin-top: 10px;
-    }
-
-    .video-container iframe {
-        width: 100%;
-        height: auto;
-        max-height: 300px;
-    }
-
-    /* Flexbox for main content */
-    body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start; /* Align items to the top */
-        min-height: 100vh;
-    }
-
-    /* Grid for buttons */
-    .legend-mode-button,
-    .classical-mode-button {
-        width: 100%;
-        max-width: none;
-        box-sizing: border-box;
-    }
-
-    /* Adjustments for specific elements */
-    .cd-container {
-        margin: 20px 0;
-    }
-
-    .typing-text {
-        width: 100%;
-        text-align: center;
-    }
-
-    .copyright-container {
-        position: static;
-        margin-top: 20px;
-    }
-
-    .exit-mode-button {
-        position: absolute;
-        text-align: center;
-        margin-top: 70px;
-        left: 50%;
-        width: 35%;
-        font-size: 0.7em;
-        box-sizing: border-box;
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-        display: block;
-    }
+    width: 30%;
+    height: auto;
+    max-height: 300px;
 }
 
 /* Basic button styles */
 .view-switcher {
     position: fixed;
-    top: 10px;
-    left: 840px;
-    z-index: 1000;
-}
+    top: 2%;
+   left: 88%; 
+z-index: 1000;
+ }
 .view-switcher button {
     padding: 0; /* Remove default button padding */
     margin: 5px;
@@ -780,4 +497,21 @@ body.classical-mode-active .exit-classical-mode-button {
 .view-switcher img {
     width: 50px; /* Adjust image size as needed */
     height: auto;
+}
+
+/* Remove current fixed positions for exit buttons and relocate them to the top-right */
+.exit-legend-mode-button,
+.exit-classical-mode-button {
+    position: fixed;
+    top: 3%;
+    left: 6%;      /* Align in the top right */
+    /* Adjust width, padding, font-size as necessary */
+    padding: 10px 20px;
+    font-size: 12px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1000;
 }
