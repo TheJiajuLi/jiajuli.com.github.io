@@ -22,6 +22,7 @@
             <img src="assets/images/cd.png" alt="CD" id="cd" class="cd">
         </div>
     </div>
+<<<<<<< Updated upstream
     <button id="stopButton" class="stop-button">Play</button>
     <audio id="backgroundAudio" controls style="display: none;"></audio>
     <button id="legendModeButton" class="legend-mode-button">Enter the Legend Mode</button>
@@ -32,11 +33,25 @@
     </div>
     <button id="exitLegendModeButton" class="exit-legend-mode-button" style="display: none;">Back to the Home Page</button>
     <button id="exitClassicalModeButton" class="exit-classical-mode-button" style="display: none;">Back to the Home Page</button>
+=======
+        <audio id="backgroundAudio" controls style="display: none;"></audio>
+        <button id="VideoModeButton" class="video-mode-button">Enter the Video Mode</button>
+        <button id="MusicModeButton" class="music-mode-button">Enter the Music Mode</button>
+        <input type="text" id="typingText" class="typing-text" placeholder="Type 'quick tour' to get started">
+    <div id="videoContainer" style="display:none;">
+    <div id="videoBackground">
+        <button id="videoToggleButton" style="display:block;">Play the Video</button>
+        <iframe id="videoVideo" width="1254" height="703.4" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    </div>
+        <button id="exitVideoModeButton" class="exit-mode-button exit-video-mode-button" style="display: none;">Back to the Home Page</button>
+        <button id="exitMusicModeButton" class="exit-mode-button exit-music-mode-button" style="display: none;">Back to the Home Page</button>
+>>>>>>> Stashed changes
     <div class="dropdown">
         <button class="dropbtn" id="exploreButton">Start to Explore</button>
         <div class="dropdown-content">
             <div class="dropdown-section">
-                <h3 class="expandable">My Piano Recordings<span class="expand-tab">▼</span></h3>
+                <h3 class="expandable_my_piano_recordings">My Piano Recordings<span class="expand-tab">▼</span></h3>
                 <div class="music-list">
                     <a href="assets/musics/single_tracks/nocturne_2.wav" class="music-link">Nocturne in E-flat Major, Op. 9 No. 2</a>
                     <a href="assets/musics/single_tracks/claire_de_lune.wav" class="music-link">Debussy: Suite bergamasque. L. 75/3. Clair de lune</a>
@@ -68,6 +83,7 @@
             </p>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script type="module" src="name_mapping.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
