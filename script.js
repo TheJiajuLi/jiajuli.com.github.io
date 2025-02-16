@@ -51,25 +51,17 @@ if (viewSwitchButton) {
     console.error('viewSwitchButton not found in the document');
 }
 
-// Add event listeners to the music-list class
-const musicLists = document.querySelectorAll('.music-list');
-musicLists.forEach(musicList => {
-    musicList.addEventListener('mouseover', () => {
-        typeText("These are some of my piano recordings when I was in 21");
-    });
-
-    musicList.addEventListener('mouseout', () => {
-        typeText(""); // Clear the typing text when mouse leaves
-    });
-});
-
 // Mapping of file paths to display names
 const musicMapping = {
     'assets/musics/single_tracks/nocturne_2.wav': 'Nocturne in E-flat Major, Op. 9 No. 2',
     'assets/musics/single_tracks/claire_de_lune.wav': 'Debussy: Suite bergamasque. L. 75/3. Clair de lune',
     'assets/musics/single_tracks/liebestraume.wav': 'Liszt: Liebesträume in A-flat Major, S. 541/3',
     'assets/musics/single_tracks/sonata_no_8.wav': 'Beethoven: Piano Sonata No. 8 in C Minor, Op. 13/2',
-    'assets/musics/single_tracks/nocturne_19.wav': 'Chopin: Nocturne No. 19 in E-Minor, Op. 72/1'
+    'assets/musics/single_tracks/nocturne_19.wav': 'Chopin: Nocturne No. 19 in E-Minor, Op. 72/1',
+    'assets/musics/full_cd/chopin_nocturnes_cd1_pollini/audio.wav': 'Chopin: Nocturnes; CD 1; Op.9, Op. 15, Op. 27, Op. 32; Maurizio Pollini',
+    'assets/musics/single_tracks/tourner_dans_le_vide.wav': 'Tourner dans le vide - Indila',
+    'assets/musics/single_tracks/legend_mode_theme_song.mp3': 'Video Mode Theme Song',
+    'assets/musics/single_tracks/bohemian_rhapsody.wav': 'Bohemian Rhapsody - Queen',
 };
 
 // Array of video URLs
@@ -80,7 +72,7 @@ const videoUrls = [
     'https://www.youtube.com/embed/-kBnCqwSO98?si=9Vd9ML9epOkthQsI'
 ];
 
-let currentVideoIndex = 3;
+let currentVideoIndex = 0;
 
 // Function to generate the music list
 function generateMusicList() {
@@ -98,14 +90,7 @@ function generateMusicList() {
         });
         musicList.appendChild(musicLink);
     }
-} // Generate the music list on page load
-window.addEventListener('load', function() {
-    backgroundAudio.src = 'assets/musics/single_tracks/tourner_dans_le_vide.wav';
-    console.log('Default audio set on load:', backgroundAudio.src);
-    generateMusicList();
-    displayUKTime(); // Display UK time on load
-    setInterval(displayUKTime, 1000); // Update UK time every second
-});
+}
 
 function playAudio() {
     backgroundAudio.play();
@@ -130,15 +115,13 @@ function hideExploreButton() {
 }
 
 legendModeButton.addEventListener('click', function() {
-    const legendModeText = 'The Legend is Now Began...';
     backgroundAudio.src = 'assets/musics/single_tracks/legend_mode_theme_song.mp3';
     backgroundAudio.onloadeddata = function() {
         playAudio();
     };
     console.log('Legend mode button clicked, playing audio:', backgroundAudio.src);
-    typeText(legendModeText);
-    legendModeButton.textContent = 'You Are Now in Legend Mode';
-    classicalModeButton.textContent = 'Enter the Classical Mode'; // Reset the other button's text
+    legendModeButton.textContent = 'Video Mode';
+    classicalModeButton.textContent = 'Music Mode'; // Reset the other button's text
     cd.src = 'assets/images/cd.png'; // Reset CD image
     body.style.backgroundImage = 'url("assets/images/legend_mode_background.jpg")'; // Change background image
     body.classList.add('legend-mode-active'); // Add class to body for legend mode
@@ -157,20 +140,17 @@ legendModeButton.addEventListener('click', function() {
     videoToggleButton.onclick = toggleVideo; // Change video toggle button event to control video
     document.getElementById('videoToggleButton').classList.remove('pulse'); // Remove pulse animation
     exitLegendModeButton.style.display = 'block';
-    exitClassicalModeButton.style.display = 'none'; // Hide classical mode exit button
     copyrightContainer.style.display = 'none'; // Hide copyright container
 });
 
 classicalModeButton.addEventListener('click', function() {
-    const classicalModeText = 'You Are Now Back to the 19th Century';
     backgroundAudio.src = 'assets/musics/full_cd/chopin_nocturnes_cd1_pollini/audio.wav';
     backgroundAudio.onloadeddata = function() {
         playAudio();
     };
     console.log('Classical mode button clicked, playing audio:', backgroundAudio.src);
-    typeText(classicalModeText);
-    classicalModeButton.textContent = 'You Are Now in Classical Mode';
-    legendModeButton.textContent = 'Enter the Legend Mode'; // Reset the other button's text
+    classicalModeButton.textContent = 'Music Mode';
+    legendModeButton.textContent = 'Legend Mode'; // Reset the other button's text
     cd.src = 'assets/images/cd_classical.png'; // Change CD image
     body.style.backgroundImage = 'url("assets/images/baroque_background_2.jpg")'; // Change background image
     body.classList.add('classical-mode-active'); // Add class to body for classical mode
@@ -186,8 +166,7 @@ classicalModeButton.addEventListener('click', function() {
     }
     document.getElementById('videoToggleButton').classList.remove('pulse'); // Remove pulse animation
     videoToggleButton.style.display = 'none'; // Makes video toggle button invisible in Classical Mode
-    exitClassicalModeButton.style.display = 'block';
-    exitLegendModeButton.style.display = 'none'; // Hide legend mode exit button
+    exitLegendModeButton.style.display = 'block'; // Hide legend mode exit button
     copyrightContainer.style.display = 'none'; // Hide copyright container
 });
 
@@ -220,44 +199,64 @@ exploreButton.addEventListener('click', function() {
 let typingPaused = false; // Flag to track if typing is paused
 let typingActive = false; // Flag to track if typing is active
 let typingTextValue = ''; // Store the current text value
+let currentTextSequence = ''; // Global text being typed
+let currentTextIndex = 0;     // Global index into the text sequence
 
 function typeText(text) {
+    // Restart the sequence with the new text
+    currentTextSequence = text;
+    currentTextIndex = 0;
+    
     typingText.style.display = 'block';
-    typingTextValue = text; // Store the current text value
-    typingText.value = ''; // Reset text content before starting the typing animation
-    let index = 0;
-    clearTimeout(typingTimeout); // Clear existing timeout
-    typingActive = true; // Set typing to active
-
+    typingText.value = ''; // Clear existing content
+    clearTimeout(typingTimeout);
+    typingActive = true;
+    
     function type() {
-        if (typingActive && !typingPaused && index < typingTextValue.length) {
-            typingText.value += typingTextValue.charAt(index);
-            typingText.scrollLeft = typingText.scrollWidth; // Scroll to the end of the text
-            index++;
-            typingTimeout = setTimeout(type, 50); // Adjust typing speed for smoother animation
-        } else if (typingActive && typingPaused) {
-            // Do nothing, just wait for the typingPaused flag to be toggled
+        if (typingActive && currentTextIndex < currentTextSequence.length) {
+            if (!typingPaused) {
+                typingText.value += currentTextSequence.charAt(currentTextIndex);
+                currentTextIndex++;
+                // Automatically scroll the text if it overflows
+                typingText.scrollLeft = typingText.scrollWidth;
+            }
+            typingTimeout = setTimeout(type, 50);
         } else {
-            // Typing is no longer active, clear the timeout
             clearTimeout(typingTimeout);
         }
     }
     type();
 }
 
-document.addEventListener('click', function(event) {
+// When clicking outside typingText, ensure typing resumes
+document.addEventListener('click', function (event) {
     if (typingActive && event.target !== typingText) {
-        typingPaused = false; // Resume typing if click is outside typingText
+        typingPaused = false;
     }
 });
 
-typingText.addEventListener('click', function(event) {
-    event.stopPropagation(); // Prevent the document click event from firing
+// When the pointer enters typingText, pause typing and stop propagation
+typingText.addEventListener('mouseenter', function (event) {
+    event.stopPropagation();
     if (typingActive) {
-        typingPaused = !typingPaused; // Toggle the typingPaused flag
+        typingPaused = true;
     }
 });
 
+// When typingText is clicked, pause typing and stop propagation
+typingText.addEventListener('click', function (event) {
+    event.stopPropagation();
+    if (typingActive) {
+        typingPaused = true;
+    }
+});
+
+// When the pointer leaves typingText, resume typing (propagation continues)
+typingText.addEventListener('mouseleave', function (event) {
+    if (typingActive) {
+        typingPaused = false;
+    }
+});
 typingText.addEventListener('keydown', function(event) {
     if (event.key === 'Enter') {
         typingActive = false; // Cancel typing if Enter is pressed
@@ -434,12 +433,23 @@ function stopVideo() {
 }
 
 function updateHomePage() {
-    typingText.classList.add('reset-animations');
+    pauseAudio();
+    typingText.classList.add('reset-animations'); 
+    backgroundAudio.src = '';
     setTimeout(() => {
-        typingText.classList.remove('reset-animations');
-    }, 10);
+    typingText.classList.remove('reset-animations');
+    }, 60000);
     displayUKTime();
 }
+// Initialize UK time on page load
+window.addEventListener('load', function() {
+    backgroundAudio.src = 'assets/musics/single_tracks/bohemian_rhapsody.wav';
+    pauseAudio();
+    console.log('Default audio set on load:', backgroundAudio.src);
+    generateMusicList();
+    displayUKTime(); // Display UK time on load
+    setInterval(displayUKTime, 60000); // Update UK time every minute
+});
 
 exitLegendModeButton.addEventListener('click', function() {
     body.classList.remove('legend-mode-active');
@@ -569,3 +579,96 @@ function displayUKTime() {
     const formattedDate = `${date}`;
     typeText(`${formattedTime} ${formattedDate}`); // Call typeText here!
 }
+
+
+
+
+function clearTypeText() {
+    typingText.value = '';        // Wipe out the current text content
+    typingActive = false;         // Reset flags if desired
+    typingPaused = false;
+}
+
+profileImage.addEventListener('mouseover', function() {
+    typeText('Jiaju Li at O2, InterContinental, Canary Wharf, London Feb 2025');
+});
+
+profileImage.addEventListener('mouseout', function() {
+    clearTypeText();
+});
+
+cd.addEventListener('mouseover', function() {
+    typeText('You can click the CD to play or pause the music');
+});
+
+cd.addEventListener('mouseout', function() {
+    clearTypeText();
+});
+
+legendModeButton.addEventListener('mouseover', function() {
+    if (!body.classList.contains('legend-mode-active') && 
+       !body.classList.contains('classical-mode-active')) {
+        typeText('Enter the Video Mode');
+    } else if (body.classList.contains('legend-mode-active') && 
+       !body.classList.contains('classical-mode-active')) {
+        typeText('You are now in Video Mode');
+    }
+});
+
+classicalModeButton.addEventListener('mouseover', function() {
+    if (!body.classList.contains('classical-mode-active') && 
+       !body.classList.contains('legend-mode-active')) {
+        typeText('Enter the Classical Mode');
+    } else if (body.classList.contains('classical-mode-active') && 
+       !body.classList.contains('legend-mode-active')) {
+        typeText('You are now in Classical Mode');
+    }
+});
+
+legendModeButton.addEventListener('mouseout', function() {
+    if (!body.classList.contains('legend-mode-active') && 
+    !body.classList.contains('classical-mode-active')) {
+        setTimeout(clearTypeText, 1500); // Delay clearTypeText by 1.5 seconds
+    }
+    if (body.classList.contains('legend-mode-active') && 
+       !body.classList.contains('classical-mode-active')) {
+        typeText('');
+    }
+});
+
+classicalModeButton.addEventListener('oneclick', function() {
+    if (!body.classList.contains('classical-mode-active') && 
+        !body.classList.contains('legend-mode-active')) {
+        setTimeout(clearTypeText, 1500);
+    }
+});
+
+viewSwitchButton.addEventListener('mouseover', function() {
+    typeText('Click the button to switch between desktop and mobile view');
+});
+
+viewSwitchButton.addEventListener('mouseout', function() {
+    clearTypeText();
+});
+
+function displayCurrentSong() {
+    if (body.classList.contains('legend-mode-active')) {
+        return;
+    }
+    if (backgroundAudio.paused) {
+        typeText("Hi, welcome to my personal website! Type 'quick tour' in here to get started");
+    } else {
+        let songName = "No Music Playing";
+        for (const filePath in musicMapping) {
+            if (backgroundAudio.src.includes(filePath)) {
+                songName = musicMapping[filePath];
+                break;
+            }
+        }
+        typeText(`Now Playing: ${songName}`);
+    }
+}
+
+backgroundAudio.addEventListener('play', displayCurrentSong);
+backgroundAudio.addEventListener('loadeddata', displayCurrentSong);
+backgroundAudio.addEventListener('pause', typeText.bind(null, 'Music Paused'));
