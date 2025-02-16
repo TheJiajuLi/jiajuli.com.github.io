@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <input type="text" id="typingText" class="typing-text" placeholder="Type 'quick tour' to get started">
     <title>Jiaju's Webpage</title>
     <link rel="stylesheet" href="style.css" id="stylesheet">
 </head>
@@ -15,26 +16,25 @@
     <h1>Jiaju's Webpage</h1>
     <p>Hi, welcome to my personal website!</p>
     <img src="assets/images/jiaju_li.jpg" alt="Jiaju Li at Canary Wharf, London" id="profileImage">
-    <div class="cd-container">
+        <div class="cd-container">
         <img src="assets/images/cd.png" alt="CD" id="cd" class="cd">
     </div>
         <audio id="backgroundAudio" controls style="display: none;"></audio>
-        <button id="legendModeButton" class="legend-mode-button">Enter the Legend Mode</button>
-        <button id="ClassicalModeButton" class="classical-mode-button">Classical Mode</button>
-        <input type="text" id="typingText" class="typing-text" placeholder="Type 'quick tour' to get started">
+        <button id="legendModeButton" class="legend-mode-button">Video Mode</button>
+        <button id="ClassicalModeButton" class="classical-mode-button">Music Mode</button>
     <div id="videoContainer" style="display:none;">
     <div id="videoBackground">
         <button id="videoToggleButton" style="display:block;">Play the Video</button>
         <iframe id="legendVideo" width="1254" height="703.4" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
     </div>
-        <button id="exitLegendModeButton" class="exit-mode-button exit-legend-mode-button" style="display: none;">Back to the Home Page</button>
-        <button id="exitClassicalModeButton" class="exit-mode-button exit-classical-mode-button" style="display: none;">Back to the Home Page</button>
+        <button id="exitLegendModeButton" class="exit-legend-mode-button" style="display: none;">Back to the Home Page</button>
+        <button id="exitClassicalModeButton" class="exit-classical-mode-button" style="display: none;">Back to the Home Page</button>
     <div class="dropdown">
         <button class="dropbtn" id="exploreButton">Start to Explore</button>
         <div class="dropdown-content">
             <div class="dropdown-section">
-                <h3 class="expandable">My Piano Recordings<span class="expand-tab">▼</span></h3>
+                <h3 class="expandable">My Piano Recordings<span class="expand-tab-1">▼</span></h3>
                 <div class="music-list">
                     <a href="assets/musics/single_tracks/nocturne_2.wav" class="music-link">Nocturne in E-flat Major, Op. 9 No. 2</a>
                     <a href="assets/musics/single_tracks/claire_de_lune.wav" class="music-link">Debussy: Suite bergamasque. L. 75/3. Clair de lune</a>
@@ -60,7 +60,7 @@
     <div class="copyright-container">
         <div class="vert-align">
             <p class="headline">
-                Copyright &copy; 2025 
+                Copyright &copy; 2025
                 <a href="https://www.linkedin.com/in/jiaju-li-631616344/">Jiaju Li</a> 
                 All Rights Reserved
             </p>
