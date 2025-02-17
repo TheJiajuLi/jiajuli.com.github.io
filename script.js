@@ -2,7 +2,6 @@ let audio = document.getElementById("audioTrack");
 let cd = document.getElementById("cd");
 let videoToggleButton = document.getElementById("videoToggleButton"); // Renamed from stopButton
 let backgroundAudio = document.getElementById('backgroundAudio');
-let messageBox = document.getElementById('music-intro');
 let dropdownContent = document.querySelector('.dropdown-content');
 let dropbtn = document.querySelector('.dropbtn');
 let isDropdownOpen = false;
@@ -10,7 +9,6 @@ let legendModeButton = document.getElementById('legendModeButton');
 let classicalModeButton = document.getElementById('ClassicalModeButton');
 let typingText = document.getElementById('typingText');
 let exploreButton = document.getElementById('exploreButton');
-let typingTimeout;
 let musicListElement = document.querySelector('.music-list'); // Corrected selector
 let body = document.querySelector('body');
 let videoContainer = document.getElementById('videoContainer');
@@ -21,7 +19,6 @@ let exitClassicalModeButton = document.getElementById('exitClassicalModeButton')
 let cdContainer = document.getElementById('cdContainer');
 let copyrightContainer = document.querySelector('.copyright-container');
 let jiajuImage = document.getElementById('jiaju_li');
-let jiajuMessageBox = document.getElementById('jiaju.jpg');
 let isMobileView = false;
 const viewSwitchButton = document.getElementById('viewSwitchButton');
 const stylesheetLink = document.getElementById('stylesheet');
@@ -176,14 +173,6 @@ cd.addEventListener('click', function() {
     } else {
         pauseAudio();
     }
-});
-
-cd.addEventListener('mouseover', function() {
-    cdMessageBox.style.display = 'block';
-});
-
-cd.addEventListener('mouseout', function() {
-    cdMessageBox.style.display = 'none';
 });
 
 exploreButton.addEventListener('click', function() {
