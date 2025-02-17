@@ -9,7 +9,6 @@ let legendModeButton = document.getElementById('legendModeButton');
 let classicalModeButton = document.getElementById('ClassicalModeButton');
 let typingText = document.getElementById('typingText');
 let exploreButton = document.getElementById('exploreButton');
-let typingTimeout;
 let musicListElement = document.querySelector('.music-list'); // Corrected selector
 let body = document.querySelector('body');
 let videoContainer = document.getElementById('videoContainer');
