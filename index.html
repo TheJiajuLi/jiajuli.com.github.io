@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <input type="text" id="typingText" class="typing-text" placeholder="Type 'quick tour' to get started">
+    <title>Jiaju's Webpage</title>
+    <link rel="stylesheet" href="style.css" id="stylesheet">
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body class="page-load">
+    <h1>Jiaju's Webpage</h1>
+    <p>Hi, welcome to my personal website!</p>
+    <audio id="backgroundAudio" controls style="display: none;"></audio>
+    <div class="music-controls">
+        <button id="MusicModeButton" class="music-mode-button">Music Mode</button>
+        <button id="exitMusicModeButton" class="exit-music-mode-button" style="display: none;">Back to the Home Page</button>
+    </div>
+    <div class="playback-controls">
+        <button class="control-btn previous-btn" aria-label="Previous track">
+            <i class="fas fa-backward"></i>
+        </button>
+        <button class="control-btn play-pause-btn" aria-label="Play/Pause">
+            <i class="fas fa-play"></i>
+        </button>
+        <button class="control-btn next-btn" aria-label="Next track">
+            <i class="fas fa-forward"></i>
+        </button>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn" id="exploreButton">Navigate</button>
+        <div class="dropdown-content">
+            <div class="dropdown-section">
+                <h3 class="expandable">Trending<span class="expand-tab-1">▼</span></h3>
+                <div class="music-list">
+                </div>
+            </div>
+            <div class="dropdown-section">
+                <h3 class="expandable">Study Resources <span class="expand-tab">▼</span></h3>
+                <div class="music-list">
+                    <a href="assets/images/number_theory.pdf" class="resource-link">Number Theory</a>
+                </div>
+            </div>
+            <div class="dropdown-section">
+                <h3 class="expandable">Social Media <span class="expand-tab">▼</span></h3>
+                <div class="music-list">
+                    <a href="https://www.instagram.com/the_jiaju_li" class="resource-link">Instagram</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="copyright-container">
+        <div class="vert-align">
+            <p class="headline">
+                Copyright &copy; 2025
+                <a href="https://www.linkedin.com/in/jiaju-li-631616344/">Jiaju Li</a> 
+                All Rights Reserved
+            </p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
