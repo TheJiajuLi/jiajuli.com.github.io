@@ -981,3 +981,8 @@ function setupMusicLinkHoverEffects() {
         });
     });
 }
+
+// Make necessary functions and variables accessible to other scripts
+window.musicMapping = musicMapping; 
+window.typeText = typeText;
+window.updateEqualizerVisibility = updateEqualizerVisibility;
