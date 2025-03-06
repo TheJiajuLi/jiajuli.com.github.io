@@ -807,46 +807,36 @@ function generateStudyResources() {
     // Define the hierarchical structure for math resources
     const resourcesHierarchy = {
         "Calculus": {
-            "Differential Calculus": [
-                { name: "Limits and Continuity", file: "files/math_tables/calculus/differential/limits_continuity.pdf" },
-                { name: "Derivatives", file: "files/math_tables/calculus/differential/derivatives.pdf" },
-                { name: "Applications of Derivatives", file: "files/math_tables/calculus/differential/applications.pdf" }
+            "Differential and Integral Calculus": [
+                { name: "DIfferential Equations", file: "files/pdfs/differential_equation.pdf" },
+                { name: "Differential and Integral Analysis", file: "files/pdfs/differential_and_integral_analysis.pdf" },
+                { name: "Introduction to Differential Geometry", file: "files/pdfs/differential_geometry.pdf" }
             ],
-            "Integral Calculus": [
-                { name: "Indefinite Integrals", file: "files/math_tables/calculus/integral/indefinite_integrals.pdf" },
-                { name: "Definite Integrals", file: "files/math_tables/calculus/integral/definite_integrals.pdf" },
-                { name: "Applications of Integration", file: "files/math_tables/calculus/integral/applications.pdf" }
+            'Calculus II': [
+                { name: "Notes", file: "files/pdfs/calculus_II.pdf" }
             ],
-            "Multivariable Calculus": [
-                { name: "Partial Derivatives", file: "files/math_tables/calculus/multivariable/partial_derivatives.pdf" },
-                { name: "Multiple Integrals", file: "files/math_tables/calculus/multivariable/multiple_integrals.pdf" }
+        },
+        'Analysis': {
+            'Real Analysis': [   
+                { name: "Limits and Continuity", file: "files/pdfs/limits_and_continuity.pdf" },
+            ],
+            'Complex Analysis': [
+                { name: "Complex Functions", file: "files/pdfs/complex_analysis.pdf" },
             ]
         },
         "Linear Algebra": {
-            "Matrices": [
-                { name: "Matrix Operations", file: "files/math_tables/linear_algebra/matrices/operations.pdf" },
-                { name: "Determinants", file: "files/math_tables/linear_algebra/matrices/determinants.pdf" },
-                { name: "Inverse Matrices", file: "files/math_tables/linear_algebra/matrices/inverse.pdf" }
+            "Matrices and Vectors": [
+                { name: "Notes", file: "files/pdfs/matrices_and_vector_analysis.pdf" }
             ],
-            "Vector Spaces": [
-                { name: "Basis and Dimension", file: "files/math_tables/linear_algebra/vector_spaces/basis.pdf" },
-                { name: "Linear Transformations", file: "files/math_tables/linear_algebra/vector_spaces/transformations.pdf" }
-            ],
-            "Eigenvalues": [
-                { name: "Eigenvalues and Eigenvectors", file: "files/math_tables/linear_algebra/eigenvalues/intro.pdf" },
-                { name: "Diagonalization", file: "files/math_tables/linear_algebra/eigenvalues/diagonalization.pdf" }
-            ]
         },
-        "Number Theory": [
-            { name: "Prime Numbers", file: "files/math_tables/number_theory/prime_numbers.pdf" },
-            { name: "Modular Arithmetic", file: "files/math_tables/number_theory/modular_arithmetic.pdf" },
-            { name: "Diophantine Equations", file: "files/math_tables/number_theory/diophantine.pdf" }
+       "Number Theory": [
+            { name: "Notes", file: "files/pdfs/number_theory.pdf" },
         ],
-        "Probability & Statistics": [
-            { name: "Probability Fundamentals", file: "files/math_tables/stats/probability_fundamentals.pdf" },
-            { name: "Statistical Distributions", file: "files/math_tables/stats/distributions.pdf" },
-            { name: "Hypothesis Testing", file: "files/math_tables/stats/hypothesis_testing.pdf" }
-        ]
+        'More': {
+            'My Dropbox Folder': [
+                { name: "Dropbox", file: "https://www.dropbox.com/scl/fo/h7ah7nbqtz5fbf11ve1d3/AEzGu0DJBOIpxCbrBFgPbiw?rlkey=unp9vdj0bs3zfhpyhy4e15zd0&st=iovc7kiy&dl=0" }
+            ],
+        }
     };
     
     // Create and append the hierarchical structure
