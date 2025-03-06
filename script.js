@@ -195,6 +195,7 @@ function generateMusicList() {
         });
         musicList.appendChild(musicLink);
     }
+    setupMusicLinkHoverEffects(); // Add this line
 }
 
 // Add error handling for audio playback
@@ -834,7 +835,7 @@ function generateStudyResources() {
         ],
         'More': {
             'My Dropbox Folder': [
-                { name: "Dropbox", file: "https://www.dropbox.com/scl/fo/h7ah7nbqtz5fbf11ve1d3/AEzGu0DJBOIpxCbrBFgPbiw?rlkey=unp9vdj0bs3zfhpyhy4e15zd0&st=iovc7kiy&dl=0" }
+                { name: "Dropbox", file: "https://www.dropbox.com/scl/fo/06jyhza3n39i29x96tjje/APz1HA98cI4W2NGH3cWJAPQ?rlkey=be3ht2dzgyaj8x2rqq7h4su0r&st=63ndm7do&dl=0" }
             ],
         }
     };
@@ -934,4 +935,49 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Generate study resources hierarchy
     generateStudyResources();
+    
+    // Setup hover effects for music links
+    setupMusicLinkHoverEffects();
+    
+    // If you're dynamically generating music links, also call this after generating them
+    generateMusicList();
+    setupMusicLinkHoverEffects();
 });
+
+// Add this function after your existing code
+function setupMusicLinkHoverEffects() {
+    // Get all music links in the Trending section
+    const trendingSectionLinks = document.querySelector('.dropdown-section:nth-of-type(1) .music-list').querySelectorAll('a');
+    
+    // Add hover effects to all music links
+    trendingSectionLinks.forEach(link => {
+        // On mouse enter, show the "Click to play" message
+        link.addEventListener('mouseenter', function() {
+            const songName = this.textContent.trim();
+            typeText(`Click to play: ${songName}`);
+        });
+        
+        // On mouse leave, clear the message
+        link.addEventListener('mouseleave', function() {
+            // Only clear if we're not in music mode (to avoid conflict with other messages)
+            if (!body.classList.contains('music-mode-active')) {
+                clearTypeText();
+                
+                // If there's active audio, show the current playing song
+                if (backgroundAudio.src && !backgroundAudio.paused) {
+                    let songName = "No Music Playing";
+                    for (const filePath in musicMapping) {
+                        if (backgroundAudio.src.includes(filePath)) {
+                            songName = musicMapping[filePath];
+                            break;
+                        }
+                    }
+                    typeText(`Now Playing: ${songName}`);
+                } else {
+                    // If no music is playing, show the default welcome message
+                    typeText("Hi, welcome to my personal website! Type 'quick tour' in here to get started");
+                }
+            }
+        });
+    });
+}
