@@ -246,7 +246,7 @@ button:hover {
 }
 
 .music-mode-button {
-    position: relative;
+    position: static;
     padding: 10px 20px;
     background-color: #008080;
     color: white;
@@ -405,10 +405,6 @@ body {
         transition: background-image 1s ease-in-out; /* Smooth transition for background image */
     }
     
-    body.video-mode-active {
-        background-image: none; /* Remove background image when video mode is active */
-        background-color: white; /* Set background color to white when video mode is active */
-    }
     body {
         font-family: 'Helvetica Neue', Arial, sans-serif;
         margin: 0;
@@ -426,11 +422,6 @@ body {
         justify-content: center;
         align-items: center;
         transition: background-image 1s ease-in-out; /* Smooth transition for background image */
-    }
-    
-    body.video-mode-active {
-        background-image: none; /* Remove background image when video mode is active */
-        background-color: white; /* Set background color to white when video mode is active */
     }
     
     body::before {
@@ -791,7 +782,75 @@ body {
             font-size: 0.6rem;
             color: #ffffff;
         }
-}
+        .resource-category {
+            margin-bottom: 10px;
+        }
+        
+        .resource-category-header {
+            cursor: pointer;
+            display: block;
+            font-size: 0.1em;
+            margin: 3px 0;
+            color: #007BFF;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .resource-category-header:hover {
+          background-color: #25d92b;
+        }
+        
+        .resource-category-content {
+          display: none;
+          padding-left: 15px;
+          margin-top: 5px;
+        }
+        
+        .resource-subcategory {
+          margin: 5px 0;
+        }
+        
+        .resource-subcategory-header {
+        cursor: pointer;
+        display: block;
+        font-size: 0.1em;
+        margin: 3px 0;
+        color: #007BFF;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        }
+        
+        .resource-subcategory-header:hover {
+          background-color: #25d92b;
+        }
+        
+        .resource-subcategory-content {
+          display: none;
+          padding-left: 15px;
+          margin-top: 5px;
+        }
+        
+        .resource-link {
+          display: block;
+          padding: 5px 8px;
+          margin: 5px 0;
+          color: #fff;
+          text-decoration: none;
+          border-radius: 3px;
+          transition: background-color 0.2s;
+          font-size: 0.8em;
+        }
+        
+        .resource-link:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+          text-decoration: underline;
+        }
+        
+        .category-expand, .subcategory-expand {
+          font-size: 0.7em;
+          transition: transform 0.2s;
+        }
+    }
 
 .music-mode-active {
     transition: background-image 0.5s ease-in-out;
@@ -903,6 +962,29 @@ top: 30px;
         width: 60px;
         height: 60px;
     }
+
+    .equalizer-animation {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 30px;
+        height: 15px;
+        z-index: 100;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.5s ease-in-out;
+      }
+      
+      .equalizer-animation img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      
+      .equalizer-animation.active {
+        opacity: 1;
+        visibility: visible;
+      }
 
 /* Remove duplicate animations */
 @keyframes spin {

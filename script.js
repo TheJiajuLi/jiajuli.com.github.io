@@ -51,6 +51,88 @@ equalizerStyle.textContent = `
 `;
 document.head.appendChild(equalizerStyle);
 
+// Add CSS for study resources hierarchy
+const studyResourcesStyle = document.createElement('style');
+studyResourcesStyle.textContent = `
+  .resource-category {
+    margin-bottom: 10px;
+  }
+  
+  .resource-category-header {
+    cursor: pointer;
+    padding: 8px;
+    background-color:rgb(255, 255, 255);
+    color: #007BFF;
+    border-radius: 4px;
+    font-weight: bold;
+    font-color: rgb(253, 253, 253);
+    font-size: 0.7em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .resource-category-header:hover {
+    background-color: #25d92b;
+  }
+  
+  .resource-category-content {
+    display: none;
+    padding-left: 15px;
+    margin-top: 5px;
+  }
+  
+  .resource-subcategory {
+    margin: 5px 0;
+  }
+  
+  .resource-subcategory-header {
+    cursor: pointer;
+    padding: 6px;
+    background-color:rgb(255, 255, 255);
+    color: #007BFF;
+    border-radius: 4px;
+    font-weight: 500;
+    font-color: rgb(193, 37, 196);
+    font-size: 0.7em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .resource-subcategory-header:hover {
+    background-color: #25d92b;
+  }
+  
+  .resource-subcategory-content {
+    display: none;
+    padding-left: 15px;
+    margin-top: 5px;
+  }
+  
+  .resource-link {
+    display: block;
+    padding: 5px 8px;
+    margin: 5px 0;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+    font-size: 0.8em;
+  }
+  
+  .resource-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    text-decoration: underline;
+  }
+  
+  .category-expand, .subcategory-expand {
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
+`;
+document.head.appendChild(studyResourcesStyle);
+
 // First, declare all the music mappings
 const musicMapping = {
     'assets/musics/single_tracks/nocturne_8.mp3': 'Nocturne in D-flat Major, Op. 27 No. 2',
@@ -712,3 +794,154 @@ backgroundAudio.addEventListener('loadeddata', updateEqualizerVisibility);
 
 // Add to the event listener for audio source changes
 backgroundAudio.addEventListener('canplay', updateEqualizerVisibility);
+
+// Add this function to generate a hierarchical structure for study resources
+function generateStudyResources() {
+    // Get the study resources container
+    const studyResourcesList = document.querySelector('.dropdown-section:nth-of-type(2) .music-list');
+    if (!studyResourcesList) return;
+    
+    // Clear existing content
+    studyResourcesList.innerHTML = '';
+    
+    // Define the hierarchical structure for math resources
+    const resourcesHierarchy = {
+        "Calculus": {
+            "Differential Calculus": [
+                { name: "Limits and Continuity", file: "files/math_tables/calculus/differential/limits_continuity.pdf" },
+                { name: "Derivatives", file: "files/math_tables/calculus/differential/derivatives.pdf" },
+                { name: "Applications of Derivatives", file: "files/math_tables/calculus/differential/applications.pdf" }
+            ],
+            "Integral Calculus": [
+                { name: "Indefinite Integrals", file: "files/math_tables/calculus/integral/indefinite_integrals.pdf" },
+                { name: "Definite Integrals", file: "files/math_tables/calculus/integral/definite_integrals.pdf" },
+                { name: "Applications of Integration", file: "files/math_tables/calculus/integral/applications.pdf" }
+            ],
+            "Multivariable Calculus": [
+                { name: "Partial Derivatives", file: "files/math_tables/calculus/multivariable/partial_derivatives.pdf" },
+                { name: "Multiple Integrals", file: "files/math_tables/calculus/multivariable/multiple_integrals.pdf" }
+            ]
+        },
+        "Linear Algebra": {
+            "Matrices": [
+                { name: "Matrix Operations", file: "files/math_tables/linear_algebra/matrices/operations.pdf" },
+                { name: "Determinants", file: "files/math_tables/linear_algebra/matrices/determinants.pdf" },
+                { name: "Inverse Matrices", file: "files/math_tables/linear_algebra/matrices/inverse.pdf" }
+            ],
+            "Vector Spaces": [
+                { name: "Basis and Dimension", file: "files/math_tables/linear_algebra/vector_spaces/basis.pdf" },
+                { name: "Linear Transformations", file: "files/math_tables/linear_algebra/vector_spaces/transformations.pdf" }
+            ],
+            "Eigenvalues": [
+                { name: "Eigenvalues and Eigenvectors", file: "files/math_tables/linear_algebra/eigenvalues/intro.pdf" },
+                { name: "Diagonalization", file: "files/math_tables/linear_algebra/eigenvalues/diagonalization.pdf" }
+            ]
+        },
+        "Number Theory": [
+            { name: "Prime Numbers", file: "files/math_tables/number_theory/prime_numbers.pdf" },
+            { name: "Modular Arithmetic", file: "files/math_tables/number_theory/modular_arithmetic.pdf" },
+            { name: "Diophantine Equations", file: "files/math_tables/number_theory/diophantine.pdf" }
+        ],
+        "Probability & Statistics": [
+            { name: "Probability Fundamentals", file: "files/math_tables/stats/probability_fundamentals.pdf" },
+            { name: "Statistical Distributions", file: "files/math_tables/stats/distributions.pdf" },
+            { name: "Hypothesis Testing", file: "files/math_tables/stats/hypothesis_testing.pdf" }
+        ]
+    };
+    
+    // Create and append the hierarchical structure
+    for (const [topCategory, subCategories] of Object.entries(resourcesHierarchy)) {
+        // Create top-level category
+        const topCategoryDiv = document.createElement('div');
+        topCategoryDiv.className = 'resource-category';
+        
+        const topCategoryHeader = document.createElement('div');
+        topCategoryHeader.className = 'resource-category-header';
+        topCategoryHeader.innerHTML = `${topCategory} <span class="category-expand">▼</span>`;
+        topCategoryDiv.appendChild(topCategoryHeader);
+        
+        const topCategoryContent = document.createElement('div');
+        topCategoryContent.className = 'resource-category-content';
+        
+        // Handle different structures for categories
+        if (Array.isArray(subCategories)) {
+            // Simple list of documents
+            subCategories.forEach(resource => {
+                const resourceLink = document.createElement('a');
+                resourceLink.href = resource.file;
+                resourceLink.className = 'resource-link';
+                resourceLink.textContent = resource.name;
+                resourceLink.setAttribute('target', '_blank');
+                topCategoryContent.appendChild(resourceLink);
+            });
+        } else {
+            // Subcategories with documents
+            for (const [subCategory, documents] of Object.entries(subCategories)) {
+                const subCategoryDiv = document.createElement('div');
+                subCategoryDiv.className = 'resource-subcategory';
+                
+                const subCategoryHeader = document.createElement('div');
+                subCategoryHeader.className = 'resource-subcategory-header';
+                subCategoryHeader.innerHTML = `${subCategory} <span class="subcategory-expand">▼</span>`;
+                subCategoryDiv.appendChild(subCategoryHeader);
+                
+                const subCategoryContent = document.createElement('div');
+                subCategoryContent.className = 'resource-subcategory-content';
+                
+                // Add documents to subcategory
+                documents.forEach(resource => {
+                    const resourceLink = document.createElement('a');
+                    resourceLink.href = resource.file;
+                    resourceLink.className = 'resource-link';
+                    resourceLink.textContent = resource.name;
+                    resourceLink.setAttribute('target', '_blank');
+                    subCategoryContent.appendChild(resourceLink);
+                });
+                
+                subCategoryDiv.appendChild(subCategoryContent);
+                topCategoryContent.appendChild(subCategoryDiv);
+            }
+        }
+        
+        topCategoryDiv.appendChild(topCategoryContent);
+        studyResourcesList.appendChild(topCategoryDiv);
+    }
+    
+    // Add click event listeners for expanding/collapsing
+    document.querySelectorAll('.resource-category-header').forEach(header => {
+        header.addEventListener('click', function() {
+            const content = this.nextElementSibling;
+            const arrow = this.querySelector('.category-expand');
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                arrow.textContent = '▼';
+            } else {
+                content.style.display = 'block';
+                arrow.textContent = '▲';
+            }
+        });
+    });
+    
+    document.querySelectorAll('.resource-subcategory-header').forEach(header => {
+        header.addEventListener('click', function() {
+            const content = this.nextElementSibling;
+            const arrow = this.querySelector('.subcategory-expand');
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                arrow.textContent = '▼';
+            } else {
+                content.style.display = 'block';
+                arrow.textContent = '▲';
+            }
+        });
+    });
+}
+
+// Initialize everything when the DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Existing initialization code
+    // ...
+    
+    // Generate study resources hierarchy
+    generateStudyResources();
+});
