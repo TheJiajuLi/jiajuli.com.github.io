@@ -17,32 +17,75 @@ const previousBtn = document.querySelector('.previous-btn');
 const nextBtn = document.querySelector('.next-btn');
 const playbackControls = document.querySelector('.playback-controls');
 
+// Add after other variable declarations
+const equalizerAnimation = document.createElement('div');
+equalizerAnimation.className = 'equalizer-animation';
+equalizerAnimation.innerHTML = `<img src="assets/images/equalizer_animation.gif" alt="Audio Equalizer">`;
+document.body.appendChild(equalizerAnimation);
+
+// Add this to your CSS via JavaScript
+const equalizerStyle = document.createElement('style');
+equalizerStyle.textContent = `
+  .equalizer-animation {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 120px;
+    height: 60px;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease-in-out;
+  }
+  
+  .equalizer-animation img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .equalizer-animation.active {
+    opacity: 1;
+    visibility: visible;
+  }
+`;
+document.head.appendChild(equalizerStyle);
+
 // First, declare all the music mappings
 const musicMapping = {
     'assets/musics/single_tracks/nocturne_8.mp3': 'Nocturne in D-flat Major, Op. 27 No. 2',
     'assets/musics/single_tracks/legend_mode_theme_song.mp3': 'Tourner Dans Le Vide-Indila',
     'assets/musics/single_tracks/bohemian_rhapsody.mp3': 'Bohemian Rhapsody',
+    'assets/musics/single_tracks/liebestraume_no_3.mp3': 'Liebestraum No. 3 in A-flat Major',
+    'assets/musics/single_tracks/memory_reboot.mp3': 'Memory Reboot',
+    'assets/musics/single_tracks/missing_you.mp3': 'Missing You-具島直子',
+    'assets/musics/single_tracks/monochrome.mp3': 'Monochrome-具島直子',
+    'assets/musics/single_tracks/candy.mp3': 'Candy-具島直子',
+    'assets/musics/single_tracks/etudes_no_4.mp3': 'Etude in C-sharp Minor, Op. 10 No. 4',
+    'assets/musics/single_tracks/etudes_no_23.mp3': 'Etude in A Minor, Op. 25 No. 11',
+    'assets/musics/single_tracks/calm_down.mp3': 'Calm Down-Rema',
 };
 
 const chopin_nocturnes = {
-    'https://s1.aigei.com/src/aud/mp3/4a/4ae691f3b8974fcfba4715b4e227fa1a.mp3?e=1739932560&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:fFITDgU9yR8HOsPwDZI7fkhPL1M=': 'Nocturne No. 13 in c Minor Op. 48-1',
-    'https://s1.aigei.com/src/aud/mp3/12/126cafd69b894aef9683273299a51ae3.mp3?e=1739940540&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:0JFqIsYd77VjkDxqFFZYbysEiYM=': 'Nocturne No. 11 in g Minor Op. 37-1',
-    'https://s1.aigei.com/src/aud/mp3/0e/0eead5b24f954f0889f0d30f4faafd50.mp3?e=1739940720&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:qvwqeIMMxt_uFoug776bLXHClKU=': 'Nocturne No. 04 in F Major Op. 15-1',
-    'https://s1.aigei.com/src/aud/mp3/21/215ba26474a842ca92031e6fe0ca8e27.mp3?e=1739940840&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:2JQwtE3fJXmOZ3hRkDdRFoyqYxk=': 'Nocturne No. 14 in f Sharp Minor Op. 48-2',
-    'https://s1.aigei.com/src/aud/mp3/a1/a1f88e3ae83e45b48c53dc141d14c0da.mp3?e=1739940840&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:ZfT3olZsIXHYUjJysRTxNP1Mm5o=': 'Nocturne No. 09 in B Major Op. 32-1',
-    'https://s1.aigei.com/src/aud/mp3/ad/ad3dad5fc88949c7b42c4cccf111be49.mp3?e=1739940900&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:Aq6ILai9DSnxMybL9S4ibJOrVpE=': 'Nocturne No. 19 in e Minor Op. 72-1',
-    'https://s1.aigei.com/src/aud/mp3/cf/cfdbd2c559544060aab196012c4d260c.mp3?e=1739940900&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:S7SceIUjPPSLYy4kw0vDGhtv6h0=': 'Nocturne No. 15 in f Minor Op. 55-1',
-    'https://s1.aigei.com/src/aud/mp3/fb/fb7fed8dbd504650a50d86caff75e025.mp3?e=1739940900&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:MjL1AThww2uQHrvXKXUJY5rT4dk=': 'Nocturne No. 05 in F Sharp Major Op. 15-2',
-    'https://s1.aigei.com/src/aud/mp3/d8/d8de8161b512456d890c6d9a489eba5a.mp3?e=1739940960&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:KfXiJHVtxz3mCXbZitHdONg-b9s=': 'Nocturne No. 06 in g Minor Op. 15-3',
-    'https://s1.aigei.com/src/aud/mp3/0b/0bc7cc2b48e44c8b8510485c5660927e.mp3?e=1739940960&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:Q7eiIAoShfsOf8D9gZbNiwpMluE=': 'Nocturne No. 20 in c Sharp Minor Posth',
-    'https://s1.aigei.com/src/aud/mp3/2d/2d6b52dcc2d2411f9d61af970a9595f5.mp3?e=1739940960&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:U93fHJoFi9Qhwt_C591HShzSstg=': 'Nocturne No. 18 in E Major Op. 62-2',
-    'https://s1.aigei.com/src/aud/mp3/55/55ef0dad15864f62bd7cb5e02193728e.mp3?e=1739941020&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:aoGmNBI6BJlul3Cq8XnzMW2YCVg=': 'Nocturne No. 16 in E Flat Major Op. 55-2',
-    'https://s1.aigei.com/src/aud/mp3/71/710454cf9fd44b8abbd43a1f47a80ca4.mp3?e=1739941020&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:cZ6LvQF6G_0NcvsiStupkSAvmlI=': 'Nocturne No. 17 in B Major Op. 62-1',
-    'https://s1.aigei.com/src/aud/mp3/04/040985bccd7c48c68848da0b37a81227.mp3?e=1739941080&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:rO4UpNNZH8OggOhNtXIqxPz5s0w=': 'Nocturne No. 10 in A Flat Major Op. 32-2',
-    'https://s1.aigei.com/src/aud/mp3/f0/f0ddccc3d8a644e1a9f5d9ad54ce9d76.mp3?e=1739941080&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:wDdgLeXqqmtxxbSmOhYIhsgUGBo=': 'Nocturne No. 12 in G Major Op. 37-2',
-    'https://s1.aigei.com/src/aud/mp3/08/083192ff7c3341b5aea65c251d7fd02a.mp3?e=1739941080&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:N3Avu9dw99wcWo5DtU_5qpC3Dqk=': 'Nocturne No. 07 in c Sharp Minor Op. 27-1',
-    'https://s1.aigei.com/src/aud/mp3/2c/2c58b944cb304e1da0172af3c6967188.mp3?e=1739941140&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:a7risHZ4izLnUODdKgLfv31fGKo=': 'Nocturne No. 08 in D Flat Major Op. 27-2'
-
+    'assets/musics/single_tracks/nocturne_1.mp3': 'Nocturne in B-minor, Op. 9 No. 1',
+    'assets/musics/single_tracks/nocturne_2.mp3': 'Nocturne in E-flat Major, Op. 9 No. 2',
+    'assets/musics/single_tracks/nocturne_3.mp3': 'Nocturne in B Major, Op. 9 No. 3',
+    'assets/musics/single_tracks/nocturne_4.mp3': 'Nocturne in F Major, Op. 15 No. 1',
+    'assets/musics/single_tracks/nocturne_5.mp3': 'Nocturne in F-sharp Major, Op. 15 No. 2',
+    'assets/musics/single_tracks/nocturne_6.mp3': 'Nocturne in G Minor, Op. 15 No. 3',
+    'assets/musics/single_tracks/nocturne_7.mp3': 'Nocturne in C-sharp Minor, Op. 27 No. 1',
+    'assets/musics/single_tracks/nocturne_8.mp3': 'Nocturne in D-flat Major, Op. 27 No. 2',
+    'assets/musics/single_tracks/nocturne_9.mp3': 'Nocturne in B Major, Op. 32 No. 1',
+    'assets/musics/single_tracks/nocturne_10.mp3': 'Nocturne in A-flat Major, Op. 32 No. 2',
+    'assets/musics/single_tracks/nocturne_11.mp3': 'Nocturne in G Minor, Op. 37 No. 1',
+    'assets/musics/single_tracks/nocturne_12.mp3': 'Nocturne in G Major, Op. 37 No. 2',
+    'assets/musics/single_tracks/nocturne_13.mp3': 'Nocturne in C Minor, Op. 48 No. 1',
+    'assets/musics/single_tracks/nocturne_14.mp3': 'Nocturne in F-sharp Minor, Op. 48 No. 2',
+    'assets/musics/single_tracks/nocturne_15.mp3': 'Nocturne in F Minor, Op. 55 No. 1',
+    'assets/musics/single_tracks/nocturne_17.mp3': 'Nocturne in B Major, Op. 62 No. 1',
+    'assets/musics/single_tracks/nocturne_18.mp3': 'Nocturne in E Major, Op. 62 No. 2',
+    'assets/musics/single_tracks/nocturne_19.mp3': 'Nocturne in E Minor, Op. 72 No. 1',
+    'assets/musics/single_tracks/nocturne_20.mp3': 'Nocturne in C-sharp Minor, Op. posth.',
 };
 
 let currentNocturneIndex = 0;
@@ -79,12 +122,14 @@ function playAudio() {
     });
     musicModeCd.classList.add('spinning');
     console.log('Playing audio:', backgroundAudio.src);
+    updateEqualizerVisibility(); // Add this line
 }
 
 function pauseAudio() {
     backgroundAudio.pause();
     musicModeCd.classList.remove('spinning');
     console.log('Pausing audio');
+    updateEqualizerVisibility(); // Add this line
 }
 
 // Function to show the explore button
@@ -127,6 +172,8 @@ musicModeButton.addEventListener('click', function() {
         playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
         updatePlaybackControls();
         
+        updateEqualizerVisibility(); // Add this line
+        
         // Add debug logging
         console.log('Music mode activated');
     } else {
@@ -155,6 +202,8 @@ musicModeButton.addEventListener('click', function() {
         musicModeCd.classList.remove('spinning');
         playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
         updatePlaybackControls();
+        
+        updateEqualizerVisibility(); // Add this line
         
         // Add debug logging
         console.log('Music mode deactivated');
@@ -325,7 +374,75 @@ typingText.addEventListener('keydown', function(event) {
         } else if (inputText === 'clear') {
             typingText.value = ''; // Clear the input bar
         } else {
-            typeText("Command not recognized. Type 'quick tour' for a website tour.");
+            // Enhanced song search functionality
+            const searchTerm = inputText.toLowerCase().replace(/_/g, '');
+            let foundSong = false;
+            let bestMatch = null;
+            let bestMatchScore = 0;
+            
+            // Function to score how well a string matches the search term
+            function getMatchScore(str, searchTerm) {
+                if (str.includes(searchTerm)) {
+                    // Full inclusion gets higher score
+                    return searchTerm.length + 10;
+                }
+                
+                // Check for partial matches by checking each word
+                const words = str.split(/\s+|_|-/);
+                for (const word of words) {
+                    if (word.startsWith(searchTerm) || searchTerm.startsWith(word)) {
+                        // Partial word match gets lower score
+                        return Math.min(word.length, searchTerm.length);
+                    }
+                }
+                return 0;
+            }
+            
+            // Search in musicMapping with scoring
+            for (const [filePath, displayName] of Object.entries(musicMapping)) {
+                const normalizedFilePath = filePath.toLowerCase().replace(/_/g, '');
+                const normalizedDisplayName = displayName.toLowerCase().replace(/_/g, '');
+                
+                // Calculate match scores for both path and name
+                const pathScore = getMatchScore(normalizedFilePath, searchTerm);
+                const nameScore = getMatchScore(normalizedDisplayName, searchTerm);
+                const totalScore = Math.max(pathScore, nameScore);
+                
+                if (totalScore > bestMatchScore) {
+                    bestMatchScore = totalScore;
+                    bestMatch = [filePath, displayName];
+                }
+            }
+            
+            // Search in chopin_nocturnes with scoring if no high score match yet
+            if (bestMatchScore < 10) {
+                for (const [filePath, displayName] of Object.entries(chopin_nocturnes)) {
+                    const normalizedFilePath = filePath.toLowerCase().replace(/_/g, '');
+                    const normalizedDisplayName = displayName.toLowerCase().replace(/_/g, '');
+                    
+                    // Calculate match scores for both path and name
+                    const pathScore = getMatchScore(normalizedFilePath, searchTerm);
+                    const nameScore = getMatchScore(normalizedDisplayName, searchTerm);
+                    const totalScore = Math.max(pathScore, nameScore);
+                    
+                    if (totalScore > bestMatchScore) {
+                        bestMatchScore = totalScore;
+                        bestMatch = [filePath, displayName];
+                    }
+                }
+            }
+            
+            // Play the best match if we found one
+            if (bestMatch && bestMatchScore > 0) {
+                backgroundAudio.src = bestMatch[0];
+                playAudio();
+                typeText(`Now Playing: ${bestMatch[1]}`);
+                foundSong = true;
+            }
+            
+            if (!foundSong) {
+                typeText(`No song found matching '${inputText}'. Try 'bohemian', 'nocturne', 'liebestraume', etc.`);
+            }
         }
     }
 });
@@ -411,6 +528,8 @@ window.addEventListener('load', function() {
     // Hide playback controls initially
     playbackControls.style.opacity = '0';
     playbackControls.style.visibility = 'hidden';
+    
+    updateEqualizerVisibility(); // Add this line
 });
 
 function getUKTime() {
@@ -515,6 +634,7 @@ backgroundAudio.addEventListener('ended', function() {
     if (body.classList.contains('music-mode-active')) {
         playNextNocturne();
     }
+    updateEqualizerVisibility(); // Add this line
 });
 // Update play/pause button
 playPauseBtn.addEventListener('click', () => {
@@ -569,3 +689,26 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
+
+// Function to update equalizer visibility based on audio state
+function updateEqualizerVisibility() {
+    if (body.classList.contains('music-mode-active')) {
+        // Hide equalizer in music mode
+        equalizerAnimation.classList.remove('active');
+    } else if (backgroundAudio.src && !backgroundAudio.paused) {
+        // Show equalizer on home page ONLY when music is playing (not paused)
+        equalizerAnimation.classList.add('active');
+        equalizerAnimation.style.opacity = '1'; // Fully visible when playing
+    } else {
+        // Hide equalizer when paused or no audio source
+        equalizerAnimation.classList.remove('active');
+    }
+}
+
+// Add these event listeners for audio state changes
+backgroundAudio.addEventListener('play', updateEqualizerVisibility);
+backgroundAudio.addEventListener('pause', updateEqualizerVisibility);
+backgroundAudio.addEventListener('loadeddata', updateEqualizerVisibility);
+
+// Add to the event listener for audio source changes
+backgroundAudio.addEventListener('canplay', updateEqualizerVisibility);
