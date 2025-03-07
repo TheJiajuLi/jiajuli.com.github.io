@@ -29,7 +29,7 @@ equalizerStyle.textContent = `
   .equalizer-animation {
     position: fixed;
     bottom: 20px;
-    left: 20px;
+    left: 10px;
     width: 120px;
     height: 60px;
     z-index: 100;
@@ -65,7 +65,7 @@ studyResourcesStyle.textContent = `
     color: #007BFF;
     border-radius: 4px;
     font-weight: bold;
-    font-color: rgb(253, 253, 253);
+    font-color: rgb(255, 255, 255);
     font-size: 0.7em;
     display: flex;
     justify-content: space-between;
@@ -114,7 +114,7 @@ studyResourcesStyle.textContent = `
     display: block;
     padding: 5px 8px;
     margin: 5px 0;
-    color: #fff;
+    color:rgb(255, 255, 255);
     text-decoration: none;
     border-radius: 3px;
     transition: background-color 0.2s;
@@ -146,6 +146,7 @@ const musicMapping = {
     'assets/musics/single_tracks/etudes_no_4.mp3': 'Etude in C-sharp Minor, Op. 10 No. 4',
     'assets/musics/single_tracks/etudes_no_23.mp3': 'Etude in A Minor, Op. 25 No. 11',
     'assets/musics/single_tracks/calm_down.mp3': 'Calm Down-Rema',
+    'assets/musics/single_tracks/its_my_life.mp3': 'It\'s My Life-Bon Jovi',
 };
 
 const chopin_nocturnes = {
@@ -986,3 +987,431 @@ function setupMusicLinkHoverEffects() {
 window.musicMapping = musicMapping; 
 window.typeText = typeText;
 window.updateEqualizerVisibility = updateEqualizerVisibility;
+
+// Add this function to populate the trending songs list
+function populateTrendingSongs() {
+    // Get the trending section from the dropdown
+    const trendingSection = document.querySelector('.dropdown-section:nth-of-type(1)');
+    const trendingMusicList = trendingSection.querySelector('.music-list');
+    
+    // Clear existing content
+    trendingMusicList.innerHTML = '';
+    
+    // Top 10 trending songs with play counts
+    const trendingSongs = [
+        { name: "Bohemian Rhapsody", path: "assets/musics/single_tracks/bohemian_rhapsody.mp3", plays: 1243 },
+        { name: "Nocturne in D-flat Major, Op. 27 No. 2", path: "assets/musics/single_tracks/nocturne_8.mp3", plays: 982 },
+        { name: "Liebestraum No. 3", path: "assets/musics/single_tracks/liebestraume_no_3.mp3", plays: 876 },
+        { name: "Calm Down - Rema", path: "assets/musics/single_tracks/calm_down.mp3", plays: 745 },
+        { name: "Nocturne in E-flat Major, Op. 9 No. 2", path: "assets/musics/single_tracks/nocturne_2.mp3", plays: 721 },
+        { name: "Tourner Dans Le Vide - Indila", path: "assets/musics/single_tracks/legend_mode_theme_song.mp3", plays: 698 },
+        { name: "Etude in C-sharp Minor, Op. 10 No. 4", path: "assets/musics/single_tracks/etudes_4.mp3", plays: 651 },
+        { name: "Memory Reboot", path: "assets/musics/single_tracks/memory_reboot.mp3", plays: 589 },
+        { name: "Missing You - 具島直子", path: "assets/musics/single_tracks/missing_you.mp3", plays: 534 },
+        { name: "Nocturne in C Minor, Op. 48 No. 1", path: "assets/musics/single_tracks/nocturne_13.mp3", plays: 498 }
+    ];
+    
+    // Create the trending songs container with a cleaner design
+    const trendingContainer = document.createElement('div');
+    trendingContainer.className = 'trending-songs-container';
+    
+    // Add title
+    const trendingTitle = document.createElement('div');
+    trendingTitle.className = 'trending-title';
+    trendingTitle.textContent = 'Hot in the last 24 hours';
+    trendingContainer.appendChild(trendingTitle);
+    
+    // Add songs
+    trendingSongs.forEach((song, index) => {
+        const songElement = document.createElement('div');
+        songElement.className = 'trending-song-item';
+        songElement.innerHTML = `
+            <span class="trending-rank">${index + 1}</span>
+            <span class="trending-song-name">${song.name}</span>
+            <span class="trending-plays">${song.plays}</span>
+        `;
+        
+        // Make the entire row clickable
+        songElement.addEventListener('click', function() {
+            backgroundAudio.src = song.path;
+            playAudio();
+            typeText(`Now Playing: ${song.name}`);
+        });
+        
+        trendingContainer.appendChild(songElement);
+    });
+    
+    // Add the container to the trending section
+    trendingMusicList.appendChild(trendingContainer);
+    
+    // Add styles for the trending section
+    const trendingStyles = document.createElement('style');
+    trendingStyles.textContent = `
+        .trending-songs-container {
+            padding: 5px 0;
+        }
+        
+        .trending-title {
+            font-size: 0.8em;
+            color: #ff0000; /* Changed from rgb(0, 0, 0) to red */
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .refresh-time {
+            font-size: 0.7em;
+            color: #aaa;
+            font-weight: normal;
+        }
+        
+        .trending-song-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            margin: 3px 0;
+            border-radius: 4px;
+            background-color: #007BFF;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .trending-song-item:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        .trending-rank {
+            font-weight: bold;
+            margin-right: 8px;
+            color:rgb(255, 255, 255);
+            min-width: 15px;
+            text-align: center;
+        }
+        
+        .trending-song-name {
+            flex-grow: 1;
+            font-size: 0.7em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .trending-plays {
+            font-size: 0.6em;
+            color: #aaa;
+            margin-left: 8px;
+        }
+        
+        /* Override the display none for trending section */
+        .dropdown-section:nth-of-type(1) .music-list {
+            display: block;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        /* Mobile adjustments */
+        @media screen and (max-width: 780px) {
+            .trending-song-name {
+                font-size: 0.65em;
+            }
+            
+            .trending-plays {
+                font-size: 0.55em;
+            }
+        }
+    `;
+    document.head.appendChild(trendingStyles);
+    
+    // Show the trending music list by default
+    trendingMusicList.style.display = 'block';
+    trendingSection.querySelector('h3 .expand-tab-1').textContent = '▲';
+    
+    // Set up hover effects for the song items
+    setupTrendingSongHoverEffects();
+}
+
+// Add hover effects for the trending songs
+function setupTrendingSongHoverEffects() {
+    const trendingSongItems = document.querySelectorAll('.trending-song-item');
+    
+    trendingSongItems.forEach(item => {
+        // On mouse enter, show the "Click to play" message
+        item.addEventListener('mouseenter', function() {
+            const songName = this.querySelector('.trending-song-name').textContent.trim();
+            typeText(`Click to play: ${songName}`);
+        });
+        
+        // On mouse leave, clear the message
+        item.addEventListener('mouseleave', function() {
+            // Only clear if we're not in music mode (to avoid conflict with other messages)
+            if (!body.classList.contains('music-mode-active')) {
+                clearTypeText();
+                
+                // If there's active audio, show the current playing song
+                if (backgroundAudio.src && !backgroundAudio.paused) {
+                    let songName = "No Music Playing";
+                    for (const filePath in musicMapping) {
+                        if (backgroundAudio.src.includes(filePath)) {
+                            songName = musicMapping[filePath];
+                            break;
+                        }
+                    }
+                    typeText(`Now Playing: ${songName}`);
+                } else {
+                    // If no music is playing, show the default welcome message
+                    typeText("Hi, welcome to my personal website! Type 'quick tour' in here to get started");
+                }
+            }
+        });
+    });
+}
+
+// Make necessary functions and variables accessible to other scripts
+window.musicMapping = musicMapping; 
+window.typeText = typeText;
+window.updateEqualizerVisibility = updateEqualizerVisibility;
+
+// Add timestamp tracking for trending songs refresh
+let lastTrendingRefreshTime = localStorage.getItem('lastTrendingRefreshTime') || 0;
+
+// Enhanced function to populate trending songs with refresh mechanism
+function populateTrendingSongs() {
+    // Check if 24 hours have passed since last refresh
+    const now = Date.now();
+    const oneDayInMilliseconds = 24 * 60 * 60 * 1000; // 24 hours
+    const shouldRefresh = (now - lastTrendingRefreshTime) > oneDayInMilliseconds;
+    
+    // Get the trending section from the dropdown
+    const trendingSection = document.querySelector('.dropdown-section:nth-of-type(1)');
+    const trendingMusicList = trendingSection.querySelector('.music-list');
+    
+    // Clear existing content
+    trendingMusicList.innerHTML = '';
+    
+    // Base trending songs
+    const baseTrendingSongs = [
+        { name: "Bohemian Rhapsody", path: "assets/musics/single_tracks/bohemian_rhapsody.mp3", plays: 1243 },
+        { name: "Nocturne in D-flat Major, Op. 27 No. 2", path: "assets/musics/single_tracks/nocturne_8.mp3", plays: 982 },
+        { name: "Liebestraum No. 3", path: "assets/musics/single_tracks/liebestraume_no_3.mp3", plays: 876 },
+        { name: "Calm Down - Rema", path: "assets/musics/single_tracks/calm_down.mp3", plays: 745 },
+        { name: "Nocturne in E-flat Major, Op. 9 No. 2", path: "assets/musics/single_tracks/nocturne_2.mp3", plays: 721 },
+        { name: "Tourner Dans Le Vide - Indila", path: "assets/musics/single_tracks/legend_mode_theme_song.mp3", plays: 698 },
+        { name: "Etude in C-sharp Minor, Op. 10 No. 4", path: "assets/musics/single_tracks/etudes_4.mp3", plays: 651 },
+        { name: "Memory Reboot", path: "assets/musics/single_tracks/memory_reboot.mp3", plays: 589 },
+        { name: "Missing You - 具島直子", path: "assets/musics/single_tracks/missing_you.mp3", plays: 534 },
+        { name: "Nocturne in C Minor, Op. 48 No. 1", path: "assets/musics/single_tracks/nocturne_13.mp3", plays: 498 }
+    ];
+    
+    let trendingSongs = [];
+    
+    if (shouldRefresh) {
+        // If refresh is needed, update play counts and possibly reorder songs
+        trendingSongs = refreshTrendingSongs(baseTrendingSongs);
+        
+        // Save the refresh time
+        localStorage.setItem('lastTrendingRefreshTime', now.toString());
+        lastTrendingRefreshTime = now;
+    } else {
+        // Load stored trending songs if available, otherwise use base list
+        const storedTrendingSongs = localStorage.getItem('trendingSongs');
+        trendingSongs = storedTrendingSongs ? JSON.parse(storedTrendingSongs) : baseTrendingSongs;
+    }
+    
+    // Create the trending songs container with a cleaner design
+    const trendingContainer = document.createElement('div');
+    trendingContainer.className = 'trending-songs-container';
+    
+    // Add title with last refresh info
+    const trendingTitle = document.createElement('div');
+    trendingTitle.className = 'trending-title';
+    
+    // Format the refresh date
+    const refreshDate = new Date(parseInt(lastTrendingRefreshTime));
+    const dateOptions = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const formattedDate = refreshDate.toLocaleDateString('en-US', dateOptions);
+    
+    trendingTitle.innerHTML = `Hot Tracks <span class="refresh-time">Updated: ${formattedDate}</span>`;
+    trendingContainer.appendChild(trendingTitle);
+    
+    // Add songs
+    trendingSongs.forEach((song, index) => {
+        const songElement = document.createElement('div');
+        songElement.className = 'trending-song-item';
+        songElement.innerHTML = `
+            <span class="trending-rank">${index + 1}</span>
+            <span class="trending-song-name">${song.name}</span>
+            <span class="trending-plays">${song.plays}</span>
+        `;
+        
+        // Make the entire row clickable
+        songElement.addEventListener('click', function() {
+            backgroundAudio.src = song.path;
+            playAudio();
+            typeText(`Now Playing: ${song.name}`);
+            
+            // Increment play count when played
+            song.plays++;
+            saveTrendingSongs(trendingSongs);
+        });
+        
+        trendingContainer.appendChild(songElement);
+    });
+    
+    // Add the container to the trending section
+    trendingMusicList.appendChild(trendingContainer);
+    
+    // Add styles for the trending section
+    const trendingStyles = document.createElement('style');
+    trendingStyles.textContent = `
+        .trending-songs-container {
+            padding: 5px 0;
+        }
+        
+        .trending-title {
+            font-size: 0.8em;
+            color: #ff0000; /* Changed from rgb(0, 0, 0) to red */
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .refresh-time {
+            font-size: 0.7em;
+            color: #aaa;
+            font-weight: normal;
+        }
+        
+        .trending-song-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            margin: 3px 0;
+            border-radius: 4px;
+            background-color: #007BFF;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .trending-song-item:hover {
+            background-color: #25d92b;
+        }
+        
+        .trending-rank {
+            font-weight: bold;
+            margin-right: 8px;
+            color:rgb(255, 255, 255);
+            min-width: 15px;
+            text-align: center;
+        }
+        
+        .trending-song-name {
+            flex-grow: 1;
+            font-size: 0.7em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .trending-plays {
+            font-size: 0.6em;
+            color: #aaa;
+            margin-left: 8px;
+        }
+        
+        /* Override the display none for trending section */
+        .dropdown-section:nth-of-type(1) .music-list {
+            display: block;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        /* Mobile adjustments */
+        @media screen and (max-width: 780px) {
+            .trending-song-name {
+                font-size: 0.65em;
+            }
+            
+            .trending-plays {
+                font-size: 0.55em;
+            }
+            
+            .refresh-time {
+                font-size: 0.6em;
+            }
+        }
+    `;
+    document.head.appendChild(trendingStyles);
+    
+    // Show the trending music list by default
+    trendingMusicList.style.display = 'block';
+    trendingSection.querySelector('h3 .expand-tab-1').textContent = '▲';
+    
+    // Set up hover effects for the song items
+    setupTrendingSongHoverEffects();
+}
+
+// Function to refresh trending songs list (randomize plays slightly and reorder)
+function refreshTrendingSongs(baseSongs) {
+    // Create a copy of the base songs
+    const refreshedSongs = JSON.parse(JSON.stringify(baseSongs));
+    
+    // Randomize play counts slightly to simulate activity
+    refreshedSongs.forEach(song => {
+        // Generate a random change between -15% and +30%
+        const changePercent = (Math.random() * 45) - 15; // -15% to +30%
+        const changeAmount = Math.floor(song.plays * (changePercent / 100));
+        song.plays += changeAmount;
+        
+        // Ensure play count doesn't go below a minimum threshold
+        song.plays = Math.max(song.plays, 100);
+    });
+    
+    // Sort by play count (descending)
+    refreshedSongs.sort((a, b) => b.plays - a.plays);
+    
+    // Save the updated list
+    saveTrendingSongs(refreshedSongs);
+    
+    return refreshedSongs;
+}
+
+// Function to save trending songs to localStorage
+function saveTrendingSongs(songs) {
+    localStorage.setItem('trendingSongs', JSON.stringify(songs));
+}
+
+// Check trending songs refresh on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Other initialization code...
+    
+    // Set initial refresh time if not set
+    if (!lastTrendingRefreshTime || lastTrendingRefreshTime === 0) {
+        lastTrendingRefreshTime = Date.now();
+        localStorage.setItem('lastTrendingRefreshTime', lastTrendingRefreshTime.toString());
+    }
+    
+    // Populate trending songs
+    populateTrendingSongs();
+    
+    // Hide other sections in the dropdown initially
+    const dropdownSections = document.querySelectorAll('.dropdown-section:not(:first-child)');
+    dropdownSections.forEach(section => {
+        section.querySelector('.music-list').style.display = 'none';
+    });
+    
+    // Set a daily check for trending refresh
+    setInterval(() => {
+        const now = Date.now();
+        const oneDayInMilliseconds = 24 * 60 * 60 * 1000; 
+        if ((now - lastTrendingRefreshTime) > oneDayInMilliseconds) {
+            console.log("24 hours passed since last trending refresh, refreshing now...");
+            populateTrendingSongs();
+        }
+    }, 60 * 60 * 1000); // Check every hour
+});

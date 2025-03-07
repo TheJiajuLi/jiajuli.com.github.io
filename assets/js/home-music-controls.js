@@ -216,7 +216,7 @@
         style.textContent = `
             .home-music-controls {
                 position: fixed;
-                bottom: 20px;
+                bottom: 50px;
                 right: 20px;
                 display: flex;
                 gap: 10px;
@@ -242,7 +242,7 @@
             
             .home-music-button img {
                 width: 20px;
-                height: 20px;
+                height: 50px;
                 object-fit: contain;
                 filter: brightness(0.9);
                 transition: all 0.2s ease;
@@ -268,7 +268,7 @@
             
             @media screen and (max-width: 780px) {
                 .home-music-controls {
-                    bottom: 10px;
+                    bottom: 60px;
                     right: 10px;
                     padding: 6px 10px;
                     gap: 8px;
