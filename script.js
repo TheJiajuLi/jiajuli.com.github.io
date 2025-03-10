@@ -1,4 +1,4 @@
-// DOM Elements
+    // DOM Elements
 const body = document.querySelector('body');
 const backgroundAudio = document.getElementById('backgroundAudio');
 const musicModeButton = document.getElementById('MusicModeButton'); // Change from MusicModeButton to musicModeButton
@@ -147,6 +147,27 @@ const musicMapping = {
     'assets/musics/single_tracks/etudes_no_23.mp3': 'Etude in A Minor, Op. 25 No. 11',
     'assets/musics/single_tracks/calm_down.mp3': 'Calm Down-Rema',
     'assets/musics/single_tracks/its_my_life.mp3': 'It\'s My Life-Bon Jovi',
+    'assets/musics/single_tracks/nocturne_1.mp3': 'Nocturne in B-minor, Op. 9 No. 1',
+    'assets/musics/single_tracks/nocturne_2.mp3': 'Nocturne in E-flat Major, Op. 9 No. 2',
+    'assets/musics/single_tracks/nocturne_3.mp3': 'Nocturne in B Major, Op. 9 No. 3',
+    'assets/musics/single_tracks/nocturne_4.mp3': 'Nocturne in F Major, Op. 15 No. 1',
+    'assets/musics/single_tracks/nocturne_5.mp3': 'Nocturne in F-sharp Major, Op. 15 No. 2',
+    'assets/musics/single_tracks/nocturne_6.mp3': 'Nocturne in G Minor, Op. 15 No. 3',
+    'assets/musics/single_tracks/nocturne_7.mp3': 'Nocturne in C-sharp Minor, Op. 27 No. 1',
+    'assets/musics/single_tracks/nocturne_8.mp3': 'Nocturne in D-flat Major, Op. 27 No. 2',
+    'assets/musics/single_tracks/nocturne_9.mp3': 'Nocturne in B Major, Op. 32 No. 1',
+    'assets/musics/single_tracks/nocturne_10.mp3': 'Nocturne in A-flat Major, Op. 32 No. 2',
+    'assets/musics/single_tracks/nocturne_11.mp3': 'Nocturne in G Minor, Op. 37 No. 1',
+    'assets/musics/single_tracks/nocturne_12.mp3': 'Nocturne in G Major, Op. 37 No. 2',
+    'assets/musics/single_tracks/nocturne_13.mp3': 'Nocturne in C Minor, Op. 48 No. 1',
+    'assets/musics/single_tracks/nocturne_14.mp3': 'Nocturne in F-sharp Minor, Op. 48 No. 2',
+    'assets/musics/single_tracks/nocturne_15.mp3': 'Nocturne in F Minor, Op. 55 No. 1',
+    'assets/musics/single_tracks/nocturne_17.mp3': 'Nocturne in B Major, Op. 62 No. 1',
+    'assets/musics/single_tracks/nocturne_18.mp3': 'Nocturne in E Major, Op. 62 No. 2',
+    'assets/musics/single_tracks/nocturne_19.mp3': 'Nocturne in E Minor, Op. 72 No. 1',
+    'assets/musics/single_tracks/nocturne_20.mp3': 'Nocturne in C-sharp Minor, Op. posth.',
+    'assets/musics/single_tracks/stan_midi.mp3': 'Stan (MIDI)',
+    'assets/musics/single_tracks/stan.mp3': 'Stan-Eminem',
 };
 
 const chopin_nocturnes = {
