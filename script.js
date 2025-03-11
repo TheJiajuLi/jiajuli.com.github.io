@@ -167,7 +167,7 @@ const musicMapping = {
     'assets/musics/single_tracks/nocturne_19.mp3': 'Nocturne in E Minor, Op. 72 No. 1',
     'assets/musics/single_tracks/nocturne_20.mp3': 'Nocturne in C-sharp Minor, Op. posth.',
     'assets/musics/single_tracks/stan_midi.mp3': 'Stan (MIDI)',
-    'assets/musics/single_tracks/stan.mp3': 'Stan-Eminem',
+    'assets/musics/single_tracks/stan_instrumental.mp3': 'Stan-Eminem(Instrumental)',
 };
 
 const chopin_nocturnes = {
