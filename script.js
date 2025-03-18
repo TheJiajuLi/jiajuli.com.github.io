@@ -1,4 +1,4 @@
-    // DOM Elements
+// DOM Elements
 const body = document.querySelector('body');
 const backgroundAudio = document.getElementById('backgroundAudio');
 const musicModeButton = document.getElementById('MusicModeButton'); // Change from MusicModeButton to musicModeButton
@@ -256,63 +256,13 @@ let typingTimeout;
 
 // Update Music Mode Button click handler
 musicModeButton.addEventListener('click', function() {
-    if (!body.classList.contains('music-mode-active')) {
-        // Entering Music Mode
-        currentNocturneIndex = 0;
-        playNextNocturne();
-        musicModeCd.classList.add('visible');
-        
-        console.log('Music mode activated, playing audio:', backgroundAudio.src);
-        musicModeButton.textContent = 'Exit Music Mode';
-        body.style.backgroundImage = 'url("assets/images/baroque_background_2.jpg")';
-        body.classList.add('music-mode-active');
-        body.classList.add('hide-dropdown');
-        hideExploreButton();
-        document.querySelector('h1').style.display = 'none';
-        document.querySelectorAll('p').forEach(p => p.style.display = 'none');
-        if (profileImage) {
-            profileImage.style.display = 'none';
-        }
-        copyrightContainer.style.display = 'none';
-        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-        updatePlaybackControls();
-        
-        updateEqualizerVisibility(); // Add this line
-        
-        // Add debug logging
-        console.log('Music mode activated');
-    } else {
-        // Exiting Music Mode
-        currentNocturneIndex = 0;
-        body.classList.remove('music-mode-active');
-        body.classList.remove('hide-dropdown');
-        document.querySelector('h1').style.display = 'block';
-        document.querySelectorAll('p').forEach(p => p.style.display = 'block');
-        musicModeButton.textContent = 'Music Mode';
-        backgroundAudio.src = 'assets/musics/single_tracks/bohemian_rhapsody.mp3';
-        pauseAudio();
-        
-        body.style.backgroundImage = 'url("assets/images/new_york_city.jpg")';
-        
-        showExploreButton();
-        copyrightContainer.style.display = 'block';
-        
-        resetAnimations();
-        updateHomePage();
-        displayUKTime();
-        setInterval(displayUKTime, 60000);
-        
-        typeText('You are now back to the home page');
-        musicModeCd.classList.remove('visible');
-        musicModeCd.classList.remove('spinning');
-        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-        updatePlaybackControls();
-        
-        updateEqualizerVisibility(); // Add this line
-        
-        // Add debug logging
-        console.log('Music mode deactivated');
-    }
+    // Redirect to dreamingpolar.com
+    window.location.href = 'https://www.dreamingpolar.com';
+});
+
+// Remove hover effect text for Music Mode button
+musicModeButton.addEventListener('mouseover', function() {
+    typeText('Click to visit Dreaming Polar');
 });
 
 // Update CD click handler
