@@ -1,74 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Add favicon -->
-    <link rel="icon" href="assets/images/logo_4.jpeg" type="image/jpeg" sizes="16x16">
-    <input type="text" id="typingText" class="typing-text" placeholder="Type 'quick tour' to get started">
-    <title>Jiaju's Webpage</title>
-    <link rel="stylesheet" href="style.css" id="stylesheet">
-    <!-- Add Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-</head>
-<body class="page-load">
-    <!-- Add logo in header -->
-    <div class="site-header">
-        <img src="assets/images/galaxy.gif" alt="Jiaju Li" class="site-logo">
-    </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <h1>Jiaju's Webpage</h1>
-    <p>Hi, welcome to my personal website!</p>
-    <audio id="backgroundAudio" controls style="display: none;"></audio>
-    <div class="music-controls">
-        <button id="MusicModeButton" class="music-mode-button">My Music App</button>
-        <button id="exitMusicModeButton" class="exit-music-mode-button" style="display: none;">Back to the Home Page</button>
-    </div>
-    <div class="playback-controls">
-        <button class="control-btn previous-btn" aria-label="Previous track">
-            <i class="fas fa-backward"></i>
-        </button>
-        <button class="control-btn play-pause-btn" aria-label="Play/Pause">
-            <i class="fas fa-play"></i>
-        </button>
-        <button class="control-btn next-btn" aria-label="Next track">
-            <i class="fas fa-forward"></i>
-        </button>
-    </div>
-    <div class="dropdown">
-        <button class="dropbtn" id="exploreButton">Navigate</button>
-        <div class="dropdown-content">
-            <div class="dropdown-section">
-                <h3 class="expandable">Trending<span class="expand-tab-1">▼</span></h3>
-                <div class="music-list">
-                </div>
-            </div>
-            <div class="dropdown-section">
-                <h3 class="expandable">Study Resources <span class="expand-tab">▼</span></h3>
-                <div class="music-list">
-                    <a href="assets/images/number_theory.pdf" class="resource-link">Number Theory</a>
-                </div>
-            </div>
-            <div class="dropdown-section">
-                <h3 class="expandable">Social Media <span class="expand-tab">▼</span></h3>
-                <div class="music-list">
-                    <a href="https://www.instagram.com/the_jiaju_li" class="resource-link">Instagram</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="copyright-container">
-        <div class="vert-align">
-            <p class="headline">
-                Copyright &copy; 2025
-                <a href="https://www.linkedin.com/in/jiaju-li-631616344/">Jiaju Li</a> 
-                All Rights Reserved
-            </p>
-        </div>
-    </div>
-    <script src="script.js"></script>
-    <script src="assets/js/nocturnes.js"></script>
-    <script src="assets/js/music-mode.js"></script>
-    <script src="assets/js/home-music-controls.js"></script>
-</body>
+    <!-- Favicon and Apple Touch Icons -->
+    <link rel="icon" type="image/jpeg" href="/assets/logos/logo_8_mini.png" />
+    <link rel="apple-touch-icon" href="/assets/logos/logo_8_mini.png" />
+    
+    <!-- Primary Meta Tags -->
+    <title>Dreaming Polar</title>
+    <meta name="title" content="Dreaming Polar - Immersive Music Experience" />
+    <meta name="description" content="Experience music like never before with Dreaming Polar's beautiful visualizations and immersive audio experience." />
+    <meta name="keywords" content="music player, music visualizer, react, web application, audio visualization, immersive music, dreaming polar" />
+    <meta name="author" content="Dreaming Polar" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.dreamingpolar.com/" />
+    <meta property="og:title" content="Dreaming Polar - Immersive Music Experience" />
+    <meta property="og:description" content="An immersive music experience with stunning visualizations" />
+    <meta property="og:image" content="https://www.dreamingpolar.com/assets/logos/logo_8_mini.jpeg" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://www.dreamingpolar.com/" />
+    <meta property="twitter:title" content="Dreaming Polar - Immersive Music Experience" />
+    <meta property="twitter:description" content="An immersive music experience with stunning visualizations" />
+    <meta property="twitter:image" content="https://www.dreamingpolar.com/assets/logos/logo_8_mini.jpeg" />
+    
+    <!-- Preload Critical Assets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    
+    <!-- Theme Color for Mobile Browsers -->
+    <meta name="theme-color" content="#000000" />
+    
+    <!-- Security -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; media-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';">
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this application.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

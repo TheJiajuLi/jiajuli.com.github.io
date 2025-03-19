@@ -1,0 +1,43 @@
+{
+  "name": "dreaming-polar",
+  "private": true,
+  "version": "2.5.0",
+  "type": "module",
+  "homepage": "https://github.com/TheJiajuLi/dreamingpolar.com.github.io.git",
+  "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "color-thief-react": "^2.1.0",
+    "colorthief": "^2.6.0",
+    "fast-average-color": "^9.4.0",
+    "framer-motion": "^10.16.4",
+    "jspdf": "^2.5.1",
+    "marked": "^9.1.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.12.0",
+    "react-router-dom": "^6.18.0",
+    "styled-components": "^6.1.1",
+    "tone": "^14.7.77",
+    "wavesurfer.js": "^7.4.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react": "^4.0.3",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "gh-pages": "^6.3.0",
+    "typescript": "^5.0.2",
+    "vite": "^4.5.9"
+  }
+}
