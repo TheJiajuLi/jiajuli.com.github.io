@@ -1559,34 +1559,6 @@ const IconButtonWithTooltip = styled(motion.button)<{ $active: boolean }>`
   }
 `;
 
-const Tooltip = styled.span`
-  position: absolute;
-  top: -28px;
-  left: -110%;
-  transform: translateX(-50%) translateY(0);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  transition: all 0.2s ease;
-  pointer-events: none;
-  z-index: 100;
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -4px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 4px solid rgba(0, 0, 0, 0.8);
-  }
-`;
-
 // Add these styled components
 const SortingSection = styled(motion.div)`
   overflow: hidden;
