@@ -4,156 +4,237 @@ import { ThemeProvider as StyledThemeProvider } from "styled-components";
 import { AnimatePresence, motion } from "framer-motion";
 import { MusicProvider } from "../context/MusicContext";
 import { LayoutProvider, useLayout } from "../context/LayoutContext";
-import { ThemeProvider, useThemeContext } from "../context/ThemeContext";
+import {
+  ThemeProvider,
+  useThemeContext,
+  ThemeContextType,
+} from "../context/ThemeContext";
+import { AppTheme } from "../styles/themes";
 import MusicExplorer from "./MusicExplorer/MusicExplorer";
 import SideBarPlayer from "./MusicPlayer/SideBarPlayer";
 import MobileMusicControls from "./MusicPlayer/MobileMusicControls";
 import HorizontalPlayerBar from "./MusicPlayer/HorizontalPlayerBar";
-import ThemeSwitcher from "./ThemeSwitcher/ThemeSwitcher";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import CommunityUploadPage from "./CommunityUpload/CommunityUploadPage";
+import NavBar from "./NavBar/NavBar";
+import SearchPage from "./Search/SearchPage";
+import LibraryPage from "./Library/LibraryPage";
 
-// Wrap this component to access theme context
-const AppContent: React.FC = () => {
+// Update type guard to handle theme context structure
+const isValidTheme = (theme: unknown): theme is ThemeContextType => {
+  if (!theme || typeof theme !== "object") return false;
+
+  const contextObj = theme as Partial<ThemeContextType>;
+  return (
+    !!contextObj.currentTheme &&
+    typeof contextObj.currentTheme === "object" &&
+    "background" in contextObj.currentTheme &&
+    "text" in contextObj.currentTheme &&
+    "ui" in contextObj.currentTheme
+  );
+};
+
+const AppRouter: React.FC = () => {
+  const location = useLocation();
   const { state: layoutState } = useLayout();
-  const { currentTheme } = useThemeContext();
+  const themeContext = useThemeContext();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
-
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  if (!isValidTheme(themeContext)) {
+    console.error(
+      "Theme validation failed:",
+      JSON.stringify(themeContext, null, 2)
+    );
+    return null;
+  }
+
   return (
-    <StyledThemeProvider theme={currentTheme}>
-      <MusicProvider>
-        <LayoutProvider>
-          <AppContainer>
-            <ThemeSwitcher />
-            <MainLayout $hasMobileControls={isMobile}>
-              {/* Explorer Section */}
-              {layoutState.explorerVisible && (
-                <ExplorerSection
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                >
+    <StyledThemeProvider theme={themeContext.currentTheme}>
+      <AppContainer>
+        <NavBar />
+        <MainLayout $hasMobileControls={isMobile}>
+          <Routes location={location}>
+            <Route
+              path="/"
+              element={
+                layoutState.explorerVisible && (
+                  <ExplorerSection style={{ width: "100%" }}>
+                    <MusicExplorer />
+                  </ExplorerSection>
+                )
+              }
+            />
+            <Route
+              path="/explorer"
+              element={
+                <ExplorerSection style={{ width: "100%" }}>
                   <MusicExplorer />
                 </ExplorerSection>
-              )}
+              }
+            />
+            <Route
+              path="/community-upload"
+              element={
+                <ExplorerSection style={{ width: "100%" }}>
+                  <CommunityUploadPage />
+                </ExplorerSection>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ExplorerSection style={{ width: "100%" }}>
+                  <div>Settings Page (Coming Soon)</div>
+                </ExplorerSection>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <ExplorerSection style={{ width: "100%" }}>
+                  <SearchPage />
+                </ExplorerSection>
+              }
+            />
+            <Route
+              path="/library"
+              element={
+                <ExplorerSection style={{ width: "100%" }}>
+                  <LibraryPage />
+                </ExplorerSection>
+              }
+            />
+          </Routes>
 
-              {/* Player Section */}
-              <PlayerSection $expanded={!layoutState.explorerVisible}>
-                <SideBarPlayer />
-              </PlayerSection>
-            </MainLayout>
-
-            {/* Independent Player Controls Section */}
-            <PlayerControlsSection>
-              <AnimatePresence mode="wait">
-                {isMobile ? (
-                  <MobileControlsWrapper
-                    key="mobile"
-                    initial={{ y: 100, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 100, opacity: 0 }}
-                    transition={{ type: "spring", damping: 20 }}
-                  >
-                    <MobileMusicControls />
-                  </MobileControlsWrapper>
-                ) : (
-                  <HorizontalControlsWrapper
-                    key="desktop"
-                    initial={{ y: 100, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 100, opacity: 0 }}
-                    transition={{ type: "spring", damping: 20 }}
-                  >
-                    <HorizontalPlayerBar />
-                  </HorizontalControlsWrapper>
-                )}
-              </AnimatePresence>
-            </PlayerControlsSection>
-          </AppContainer>
-        </LayoutProvider>
-      </MusicProvider>
+          <HiddenPlayerSection>
+            <SideBarPlayer />
+          </HiddenPlayerSection>
+        </MainLayout>
+        <PlayerControlsSection>
+          <AnimatePresence mode="wait">
+            {isMobile ? (
+              <MobileControlsWrapper
+                key="mobile"
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                transition={{ type: "spring", damping: 20 }}
+                $theme={themeContext.currentTheme}
+              >
+                <MobileMusicControls />
+              </MobileControlsWrapper>
+            ) : (
+              <HorizontalControlsWrapper
+                key="desktop"
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                transition={{ type: "spring", damping: 20 }}
+              >
+                <HorizontalPlayerBar />
+              </HorizontalControlsWrapper>
+            )}
+          </AnimatePresence>
+        </PlayerControlsSection>
+      </AppContainer>
     </StyledThemeProvider>
   );
 };
 
-// Main App component with ThemeProvider
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <LayoutProvider>
+      <MusicProvider>
+        <AppRouter />
+      </MusicProvider>
+    </LayoutProvider>
   );
 };
 
-// Styled components that use theme props
-const AppContainer = styled.div`
+const App: React.FC = () => {
+  return (
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </BrowserRouter>
+  );
+};
+
+const AppContainer = styled.div.attrs<{ theme: AppTheme }>(({ theme }) => ({
+  style: {
+    background: theme.background.gradient,
+  },
+}))`
   width: 100vw;
   height: 100vh;
   overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
-  background: ${({ theme }) => theme.background.gradient};
-  backdrop-filter: blur(${({ theme }) => theme.background.blur});
 `;
 
-const MainLayout = styled.div<{ $hasMobileControls?: boolean }>`
+const MainLayout = styled.div.attrs<{ $hasMobileControls?: boolean }>(
+  ({ $hasMobileControls }) => ({
+    style: {
+      marginBottom: $hasMobileControls ? "54.2px" : "32px",
+    },
+  })
+)`
   display: flex;
-  height: calc(100vh - 100px); /* Leave space for player controls */
+  flex: 1;
+  width: 100%;
   position: relative;
   overflow: hidden;
-  gap: 20px;
-  padding: 20px 20px 0 20px;
 
   @media (max-width: 768px) {
-    height: calc(100vh - 80px); /* Adjust for mobile controls */
-    flex-direction: column;
-    gap: 12px;
-    padding: 12px 12px 0 12px;
+    height: calc(100vh - 80px);
+    padding: 0;
   }
 `;
 
-const ExplorerSection = styled(motion.div)`
-  height: 100%;
+const ExplorerSection = styled(motion.div).attrs(() => ({
+  initial: { opacity: 0, x: -20 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -20 },
+}))`
+  flex: 1;
+  width: 100%;
+  height: 92%;
   overflow: hidden;
-  background: ${({ theme }) => theme.explorer.background};
+  margin-top: 0px;
   backdrop-filter: blur(10px);
-  border-radius: 12px;
   transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1);
   display: flex;
-  margin-left: 10px;
-  border: 1px solid ${({ theme }) => theme.explorer.border};
 
   @media (max-width: 768px) {
     height: 100%;
-    margin-left: 0;
-    border-radius: 0;
+    margin-top: 0;
+    border-radius: 0px;
+    border: none;
   }
 `;
 
-const PlayerSection = styled.div<{ $expanded: boolean }>`
-  flex: 1;
-  height: 100%;
+const HiddenPlayerSection = styled.div`
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
   border-radius: 12px;
-  background: ${({ theme }) => theme.player.background};
-  backdrop-filter: blur(10px);
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-left: ${(props) => (props.$expanded ? "0" : "20px")};
-  border: 1px solid ${({ theme }) => theme.explorer.border};
-
-  @media (max-width: 768px) {
-    margin-left: 0;
-  }
 `;
 
 const PlayerControlsSection = styled.div`
@@ -165,14 +246,19 @@ const PlayerControlsSection = styled.div`
   pointer-events: none;
 `;
 
-const MobileControlsWrapper = styled(motion.div)`
+const MobileControlsWrapper = styled(motion.div).attrs<{ $theme: AppTheme }>(
+  ({ $theme }) => ({
+    style: {
+      background: $theme?.background?.secondary || "rgba(0, 0, 0, 0.8)",
+    },
+  })
+)`
   pointer-events: auto;
   width: 100%;
-  padding: 0 12px 12px;
-  background: ${({ theme }) => theme.player.controls};
+  padding: 0;
   backdrop-filter: blur(20px);
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
 `;
 
@@ -180,9 +266,6 @@ const HorizontalControlsWrapper = styled(motion.div)`
   pointer-events: auto;
   width: 100%;
   padding: 0 15px 20px;
-  background: ${({ theme }) => theme.player.controls};
-  backdrop-filter: blur(20px);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
 `;
 
 export default App;

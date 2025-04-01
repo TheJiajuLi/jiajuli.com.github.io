@@ -6,16 +6,17 @@ import React, {
   useCallback,
   useLayoutEffect,
 } from "react";
-import styled, { keyframes, css } from "styled-components";
-import { motion, AnimatePresence, m } from "framer-motion";
+import styled, { createGlobalStyle } from "styled-components";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaPause, FaPlay } from "react-icons/fa"; // Remove FaSortAlphaDown
+import { FiZoomIn, FiZoomOut } from "react-icons/fi";
 import { useMusicContext } from "../../context/MusicContext";
 import CustomScrollbar from "../shared/CustomScrollbar";
 import { Track } from "../../types/music";
 import { getSafeCoverArt } from "../../utils/imageUtils";
-import { FaSortAlphaDown, FaPause, FaPlay } from "react-icons/fa";
 import { useLayout } from "../../context/LayoutContext";
-import toggleIcon from "/assets/icons/toggle_button.png";
-import { FiZoomIn, FiZoomOut } from "react-icons/fi"; // Add these to your imports
+import CommunityTracksSection from "./CommunityTracksSection";
+import { ICONS } from "../../constants/assetPaths";
 
 interface TrackStats {
   plays: number;
@@ -54,10 +55,51 @@ interface FilterOptions {
   minPlays: number;
 }
 
+// Animated equalizer component that activates when music is playing
+const AnimatedEqualizer = ({ isPlaying }: { isPlaying: boolean }) => {
+  return (
+    <EqualizerContainer $isPlaying={isPlaying}>
+      <EqualizerBar $delay={0} $height={0.7} />
+      <EqualizerBar $delay={0.2} $height={1} />
+      <EqualizerBar $delay={0.1} $height={0.5} />
+      <EqualizerBar $delay={0.3} $height={0.8} />
+    </EqualizerContainer>
+  );
+};
+
+const EqualizerContainer = styled.div<{ $isPlaying: boolean }>`
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 16px;
+  gap: 2px;
+  opacity: ${(props) => (props.$isPlaying ? 1 : 0.6)};
+  transition: opacity 0.3s ease;
+`;
+
+const EqualizerBar = styled.div<{ $delay: number; $height: number }>`
+  width: 3px;
+  height: ${(props) => props.$height * 16}px;
+  background: #4caf50;
+  border-radius: 1px;
+  transform-origin: bottom;
+  animation: ${(props) =>
+    `equalizer 1.2s ${props.$delay}s ease-in-out infinite alternate`};
+
+  @keyframes equalizer {
+    0% {
+      height: ${(props) => props.$height * 5}px;
+    }
+    100% {
+      height: ${(props) => props.$height * 16}px;
+    }
+  }
+`;
+
 const MusicExplorer: React.FC = () => {
   const { state, dispatch } = useMusicContext();
   const { dispatch: layoutDispatch } = useLayout();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false); // Changed from true to false
   const [trackStats, setTrackStats] = useState<Record<string, TrackStats>>({});
   const [sortOptions, setSortOptions] = useState<SortOptions>({
     field: "title",
@@ -68,11 +110,20 @@ const MusicExplorer: React.FC = () => {
     favorites: false,
     minPlays: 0,
   });
-  const [showFilters, setShowFilters] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSortPanel, setShowSortPanel] = useState(false);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Add responsive handler
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Add state variables to the MusicExplorer component
   // New state variables for album view
@@ -86,6 +137,36 @@ const MusicExplorer: React.FC = () => {
   const explorerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+
+  // Add resize observer to handle dynamic font sizing
+  useEffect(() => {
+    if (!titleRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const width = entry.contentRect.width;
+        const element = entry.target as HTMLElement;
+
+        // Adjust font size based on container width
+        if (width < 200 && isExpanded) {
+          element.style.fontSize = "1.1rem";
+        } else if (width < 300 && isExpanded) {
+          element.style.fontSize = "1.3rem";
+        } else {
+          element.style.fontSize = isExpanded ? "1.5rem" : "1.2rem";
+        }
+      }
+    });
+
+    resizeObserver.observe(titleRef.current);
+
+    return () => {
+      if (titleRef.current) {
+        resizeObserver.unobserve(titleRef.current);
+      }
+    };
+  }, [isExpanded]);
 
   // Track statistics management
   useEffect(() => {
@@ -210,38 +291,87 @@ const MusicExplorer: React.FC = () => {
   useEffect(() => {
     layoutDispatch({
       type: "SET_EXPLORER_WIDTH",
-      payload: isExpanded ? 350 : 60,
+      payload: 60, // Set initial width to collapsed state
     });
-  }, [isExpanded, layoutDispatch]);
+  }, []); // Empty dependency array for initial setup only
 
-  // Handle explorer collapse/expand
-  const handleExplorerToggle = () => {
+  // Update the handleExplorerToggle function to prevent going off-screen
+
+  const handleExplorerToggle = useCallback(() => {
     const willCollapse = isExpanded;
-    setIsExpanded(!isExpanded);
-    setIsOpen(!willCollapse); // Update isOpen state
+    setIsExpanded(!willCollapse);
+
+    // This dispatch updates the global layout state
     layoutDispatch({ type: "TOGGLE_EXPLORER" });
+
+    // Safety check - if there's no music context or queue is empty, use a more conservative width
+    const hasMusicContext = state.queue && state.queue.length > 0;
+
+    // Adjust layout specifically for mobile
+    if (isMobile) {
+      // When on mobile, we need to adjust the mainContentWidth differently
+      // Add a maximum cap to prevent going off-screen
+      const safeWidth = Math.min(
+        window.innerWidth,
+        document.body.clientWidth - 20
+      ); // Leave a small margin
+
+      layoutDispatch({
+        type: "SET_EXPLORER_WIDTH",
+        payload: willCollapse ? 70 : safeWidth,
+      });
+    } else {
+      // On desktop, use standard widths but with a maximum reasonable size
+      const parentWidth = explorerRef.current?.parentElement?.clientWidth || 0;
+      const maxExpandedWidth = Math.min(
+        window.innerWidth * 0.8, // 80% of window
+        parentWidth > 0 ? parentWidth : 800 // Use parent width if available, otherwise cap at 800px
+      );
+
+      layoutDispatch({
+        type: "SET_EXPLORER_WIDTH",
+        payload: willCollapse ? 110 : maxExpandedWidth,
+      });
+    }
 
     // Reset all expanded states when collapsing
     if (willCollapse) {
       // Always return to album view when collapsing
       setViewMode("albums");
       setSelectedAlbum(null);
-
-      // Reset filter states
-      setShowFilters(false);
-      setFilterOptions({
-        search: "",
-        favorites: false,
-        minPlays: 0,
-      });
-      setSortOptions({
-        field: "title",
-        direction: "asc",
-      });
-      // Close sorting panel
-      setShowSortPanel(false);
+      // Reset other states...
     }
-  };
+  }, [isExpanded, layoutDispatch, isMobile, state.queue, explorerRef]);
+
+  // Add a new useEffect to ensure the explorer always stays visible
+  useEffect(() => {
+    // This ensures explorer stays visible when expanded
+    if (isExpanded && explorerRef.current) {
+      // Check if the explorer is off-screen
+      const rect = explorerRef.current.getBoundingClientRect();
+      const isOffScreen = rect.right < 0 || rect.left > window.innerWidth;
+
+      if (isOffScreen) {
+        // If it's off-screen, reset to a safe position
+        explorerRef.current.style.transform = "translateX(0)";
+        // Force a reflow to ensure it's visible
+        explorerRef.current.style.opacity = "0.99";
+
+        // Request animation frame to ensure it renders properly
+        requestAnimationFrame(() => {
+          if (explorerRef.current) {
+            explorerRef.current.style.opacity = "1";
+          }
+        });
+
+        // Update the layout if necessary
+        layoutDispatch({
+          type: "SET_EXPLORER_WIDTH",
+          payload: Math.min(window.innerWidth * 0.8, 800),
+        });
+      }
+    }
+  }, [isExpanded, layoutDispatch]);
 
   // Add useEffect for keyboard shortcuts
   useEffect(() => {
@@ -276,7 +406,6 @@ const MusicExplorer: React.FC = () => {
   // Also add an effect to auto-collapse panels on width change
   useEffect(() => {
     if (!isExpanded) {
-      setShowFilters(false);
       setShowSortPanel(false);
     }
   }, [isExpanded]);
@@ -406,15 +535,7 @@ const MusicExplorer: React.FC = () => {
     setSelectedAlbum(null);
   };
 
-  // Add this function to your component
-  const adjustAlbumSize = (increment: boolean) => {
-    setAlbumSize((prev) => {
-      const newSize = increment ? prev + 20 : prev - 20;
-      return Math.max(minAlbumSize, Math.min(maxAlbumSize, newSize));
-    });
-  };
-
-  // Modify the existing content rendering based on view mode
+  // Update the renderContent function
   const renderContent = () => {
     if (isLoading) {
       return (
@@ -431,50 +552,50 @@ const MusicExplorer: React.FC = () => {
 
     if (viewMode === "albums") {
       return (
-        <AlbumGrid
-          $isExpanded={isExpanded}
-          style={{
-            gridTemplateColumns: isExpanded
-              ? `repeat(auto-fill, minmax(${albumSize}px, 1fr))`
-              : "1fr",
-          }}
-        >
-          {filterAlbums.map((album) => (
-            <AlbumItem
-              key={album.id}
-              onClick={() => handleAlbumClick(album)}
-              $isExpanded={isExpanded}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 30,
-                mass: 0.8,
-              }}
-            >
-              <AlbumCover
+        <AlbumGrid $isExpanded={isExpanded} $albumSize={albumSize}>
+          {filterAlbums.length === 0 ? (
+            <EmptyStateMessage>
+              No albums match your search criteria
+            </EmptyStateMessage>
+          ) : (
+            filterAlbums.map((album) => (
+              <AlbumItem
+                key={album.id}
+                onClick={() => handleAlbumClick(album)}
                 $isExpanded={isExpanded}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 30,
+                  mass: 0.8,
+                }}
               >
-                <img
-                  src={getSafeCoverArt(album.coverArt)}
-                  alt={`${album.title} cover`}
-                  loading="lazy"
-                  draggable={false}
-                />
-              </AlbumCover>
+                <AlbumCover
+                  $isExpanded={isExpanded}
+                  $size={albumSize}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <img
+                    src={getSafeCoverArt(album.coverArt)}
+                    alt={`${album.title} cover`}
+                    loading="lazy"
+                    draggable={false}
+                  />
+                </AlbumCover>
 
-              {isExpanded && (
-                <AlbumInfo>
-                  <AlbumTitle>{album.title}</AlbumTitle>
-                  <AlbumArtist>{album.artist}</AlbumArtist>
-                  <TrackCount>{album.tracks.length} tracks</TrackCount>
-                </AlbumInfo>
-              )}
-            </AlbumItem>
-          ))}
+                {isExpanded && (
+                  <AlbumInfo>
+                    <AlbumTitle>{album.title}</AlbumTitle>
+                    <AlbumArtist>{album.artist}</AlbumArtist>
+                    <TrackCount>{album.tracks.length} tracks</TrackCount>
+                  </AlbumInfo>
+                )}
+              </AlbumItem>
+            ))
+          )}
         </AlbumGrid>
       );
     } else if (viewMode === "tracks" && selectedAlbum) {
@@ -560,202 +681,289 @@ const MusicExplorer: React.FC = () => {
     }
   }, [showSortPanel]);
 
+  // Add useEffect to handle container resizing
+  useEffect(() => {
+    if (!explorerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      // When parent container changes size, ensure we're still filling it
+      if (isExpanded) {
+        layoutDispatch({
+          type: "SET_EXPLORER_WIDTH",
+          payload:
+            explorerRef.current?.parentElement?.clientWidth ||
+            window.innerWidth,
+        });
+      }
+    });
+
+    // Observe the parent container
+    const parentElement = explorerRef.current.parentElement;
+    if (parentElement) {
+      resizeObserver.observe(parentElement);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [isExpanded, layoutDispatch]);
+
   // Update the return JSX to use the renderContent function
   return (
-    <ExplorerContainer
-      ref={explorerRef}
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.3 }}
-      $isExpanded={isExpanded}
-    >
-      {/* Add the visualizer as the first element to ensure it's behind other content */}
-      <AlbumArtColorVisualizer />
+    <>
+      <ExplorerGlobalStyles />
+      <ExplorerContainer
+        ref={explorerRef}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.3 }}
+        $isExpanded={isExpanded}
+        className="explorer-container"
+      >
+        {/* Add the visualizer as the first element to ensure it's behind other content */}
+        <AlbumArtColorVisualizer />
 
-      <Header $isExpanded={isExpanded}>
-        <Title
-          $isExpanded={isExpanded}
-          animate={{
-            scale: isExpanded ? 1 : 0.9,
-          }}
-          transition={{ duration: 0.3 }}
-        >
-          {isExpanded
-            ? viewMode === "albums"
-              ? "Music Explorer"
-              : selectedAlbum?.title || "Tracks"
-            : "DP"}
-          <TitleIcon src={toggleIcon} alt="Music Explorer" $isOpen={isOpen} />
-        </Title>
+        <Header $isExpanded={isExpanded} className="header-section">
+          <Title
+            ref={titleRef}
+            $isExpanded={isExpanded}
+            animate={{
+              scale: isExpanded ? 1 : 0.9,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            {isExpanded
+              ? viewMode === "albums"
+                ? "All Time Best" // Changed from "Music Explorer" to "All Time Best"
+                : selectedAlbum?.title || "Tracks"
+              : "DP"}
+          </Title>
 
-        <HeaderControls>
-          {/* Show album size controls only when expanded and in album view */}
+          {/* Add Album Size Controls - Only show when in album view and expanded */}
           {isExpanded && viewMode === "albums" && (
             <CompactSizeControls
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
             >
-              <AlbumSizeButton
-                onClick={() => adjustAlbumSize(false)}
+              <AlbumSizeButtonWithTooltip
+                onClick={() =>
+                  setAlbumSize(Math.max(minAlbumSize, albumSize - 10))
+                }
                 disabled={albumSize <= minAlbumSize}
-                title="Smaller album tiles"
-                whileTap={{ scale: 0.9 }}
-                style={{ width: "28px", height: "28px" }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                data-tooltip={`Small albums (${minAlbumSize}px)`}
               >
-                <FiZoomOut size={14} />
-              </AlbumSizeButton>
+                <SmallAlbumIcon />
+              </AlbumSizeButtonWithTooltip>
 
-              <AlbumSizeSlider style={{ width: "60px", height: "4px" }}>
-                <AlbumSizeProgress
-                  $progress={
-                    (albumSize - minAlbumSize) / (maxAlbumSize - minAlbumSize)
-                  }
-                />
-              </AlbumSizeSlider>
+              <SliderContainer>
+                <AlbumSizeSlider
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const progress = clickX / rect.width;
+                    const newSize =
+                      minAlbumSize + progress * (maxAlbumSize - minAlbumSize);
+                    setAlbumSize(Math.round(newSize));
+                  }}
+                >
+                  <AlbumSizeProgress
+                    $progress={
+                      (albumSize - minAlbumSize) / (maxAlbumSize - minAlbumSize)
+                    }
+                  />
+                  <SliderThumb
+                    $progress={
+                      (albumSize - minAlbumSize) / (maxAlbumSize - minAlbumSize)
+                    }
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0}
+                    dragMomentum={false}
+                    onDrag={(e, info) => {
+                      const parent = (e.target as HTMLElement).parentElement;
+                      if (!parent) return;
+                      const rect = parent.getBoundingClientRect();
+                      const progress = Math.max(
+                        0,
+                        Math.min(1, (info.point.x - rect.left) / rect.width)
+                      );
+                      const newSize =
+                        minAlbumSize + progress * (maxAlbumSize - minAlbumSize);
+                      setAlbumSize(Math.round(newSize));
+                    }}
+                  >
+                    <SizeTooltip>{albumSize}px</SizeTooltip>
+                  </SliderThumb>
+                </AlbumSizeSlider>
+              </SliderContainer>
 
-              <AlbumSizeButton
-                onClick={() => adjustAlbumSize(true)}
+              <AlbumSizeButtonWithTooltip
+                onClick={() =>
+                  setAlbumSize(Math.min(maxAlbumSize, albumSize + 10))
+                }
                 disabled={albumSize >= maxAlbumSize}
-                title="Larger album tiles"
-                whileTap={{ scale: 0.9 }}
-                style={{ width: "28px", height: "28px" }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                data-tooltip={`Large albums (${maxAlbumSize}px)`}
               >
-                <FiZoomIn size={14} />
-              </AlbumSizeButton>
+                <LargeAlbumIcon />
+              </AlbumSizeButtonWithTooltip>
             </CompactSizeControls>
           )}
 
-          <ExpandButton
-            onClick={handleExplorerToggle}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            aria-label={isExpanded ? "Collapse explorer" : "Expand explorer"}
-          >
-            {isExpanded ? "−" : "+"}
-          </ExpandButton>
-        </HeaderControls>
-      </Header>
+          <HeaderControls $isExpanded={isExpanded}>
+            <ExpandButton
+              $isExpanded={isExpanded}
+              onClick={handleExplorerToggle}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              aria-label={isExpanded ? "Collapse explorer" : "Expand explorer"}
+            >
+              {isExpanded ? "−" : "+"}
+            </ExpandButton>
+          </HeaderControls>
+        </Header>
 
-      {error && (
-        <ErrorMessage>
-          {error}
-          <RetryButton onClick={() => window.location.reload()}>
-            Retry
-          </RetryButton>
-        </ErrorMessage>
-      )}
+        {error && (
+          <ErrorMessage>
+            {error}
+            <RetryButton onClick={() => window.location.reload()}>
+              Retry
+            </RetryButton>
+          </ErrorMessage>
+        )}
 
-      {!error && isExpanded && (
-        <AnimatePresence>
-          <Controls>
-            <SearchInput
-              ref={searchInputRef}
-              value={filterOptions.search}
-              onChange={(e) =>
-                setFilterOptions((prev) => ({
-                  ...prev,
-                  search: e.target.value,
-                }))
-              }
-              placeholder={
-                viewMode === "albums" ? "Search albums..." : "Search tracks..."
-              }
-            />
+        {!error && isExpanded && (
+          <AnimatePresence>
+            <Controls className="controls-section">
+              <SearchInput
+                ref={searchInputRef}
+                value={filterOptions.search}
+                onChange={(e) =>
+                  setFilterOptions((prev) => ({
+                    ...prev,
+                    search: e.target.value,
+                  }))
+                }
+                placeholder={
+                  viewMode === "albums"
+                    ? "Search albums..."
+                    : "Search tracks..."
+                }
+              />
 
-            <ControlButtons>
-              <IconButtonWithTooltip
-                onClick={() => setShowSortPanel(!showSortPanel)}
-                $active={showSortPanel}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                data-sort-button
-              >
-                <CategoryIconWrapper $active={showSortPanel}>
-                  <img
-                    src="public/assets/icons/categories.png"
-                    alt="Sort options"
-                    width="16"
-                    height="16"
-                    style={{ objectFit: "contain" }}
-                  />
-                </CategoryIconWrapper>
-              </IconButtonWithTooltip>
-
-              {viewMode === "tracks" && (
+              <ControlButtons>
                 <IconButtonWithTooltip
-                  onClick={handleBackToAlbums}
-                  $active={false}
+                  onClick={() => setShowSortPanel(!showSortPanel)}
+                  $active={showSortPanel}
+                  $tooltip="Sort options"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  data-sort-button
                 >
-                  <span>←</span>
-                  {/* Removed the Tooltip element here */}
+                  <CategoryIconWrapper $active={showSortPanel}>
+                    {state.isPlaying ? (
+                      <AnimatedEqualizer isPlaying={true} />
+                    ) : (
+                      <StyledImage
+                        src="public/assets/icons/equalizer_green.png"
+                        alt="Sort options"
+                        className="equalizer-icon"
+                      />
+                    )}
+                  </CategoryIconWrapper>
                 </IconButtonWithTooltip>
-              )}
-            </ControlButtons>
-          </Controls>
-        </AnimatePresence>
-      )}
 
-      <AnimatePresence>
-        {showSortPanel && (
-          <SortingSection
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            <SortOptionList>
-              {sortOptionsList.map((option) => (
-                <SortOptionItem
-                  key={option.value}
-                  $isActive={sortOptions.field === option.value}
-                  onClick={() => {
-                    if (sortOptions.field === option.value) {
-                      setSortOptions((prev) => ({
-                        ...prev,
-                        direction: prev.direction === "asc" ? "desc" : "asc",
-                      }));
-                    } else {
-                      setSortOptions({
-                        field: option.value as SortOptions["field"],
-                        direction: "asc",
-                      });
-                    }
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <span>{option.label}</span>
-                  {sortOptions.field === option.value && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      {sortOptions.direction === "asc" ? "↑" : "↓"}
-                    </motion.span>
-                  )}
-                </SortOptionItem>
-              ))}
-            </SortOptionList>
-          </SortingSection>
+                {viewMode === "tracks" && (
+                  <IconButtonWithTooltip
+                    onClick={handleBackToAlbums}
+                    $active={false}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span>←</span>
+                  </IconButtonWithTooltip>
+                )}
+              </ControlButtons>
+            </Controls>
+          </AnimatePresence>
         )}
-      </AnimatePresence>
 
-      <ContentContainer
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <CustomScrollbar ref={scrollContainerRef}>
-          {renderContent()}
-        </CustomScrollbar>
-      </ContentContainer>
-      <AlbumArtColorVisualizer />
-    </ExplorerContainer>
+        <AnimatePresence>
+          {showSortPanel && (
+            <SortingSection
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="sorting-section"
+            >
+              <SortOptionList>
+                {sortOptionsList.map((option) => (
+                  <SortOptionItem
+                    key={option.value}
+                    $isActive={sortOptions.field === option.value}
+                    onClick={() => {
+                      if (sortOptions.field === option.value) {
+                        setSortOptions((prev) => ({
+                          ...prev,
+                          direction: prev.direction === "asc" ? "desc" : "asc",
+                        }));
+                      } else {
+                        setSortOptions({
+                          field: option.value as SortOptions["field"],
+                          direction: "asc",
+                        });
+                      }
+                    }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <span>{option.label}</span>
+                    {sortOptions.field === option.value && (
+                      <motion.div
+                        className="direction-indicator"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                      >
+                        <motion.span
+                          initial={{ opacity: 0 }}
+                          animate={{
+                            opacity: 1,
+                            rotate: sortOptions.direction === "asc" ? 0 : 180,
+                          }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          ↑
+                        </motion.span>
+                      </motion.div>
+                    )}
+                  </SortOptionItem>
+                ))}
+              </SortOptionList>
+            </SortingSection>
+          )}
+        </AnimatePresence>
+
+        <ContentContainer
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="content-container"
+        >
+          <CustomScrollbar ref={scrollContainerRef}>
+            {renderContent()}
+            <CommunityTracksSection />
+          </CustomScrollbar>
+        </ContentContainer>
+        <AlbumArtColorVisualizer />
+      </ExplorerContainer>
+    </>
   );
 };
 
@@ -899,9 +1107,17 @@ const TrackItem: React.FC<TrackItemProps> = ({
         />
         {isActive && (
           <PlayingIndicator
+            role="button"
+            tabIndex={0}
             onClick={(e) => {
               e.stopPropagation(); // Prevent parent click
               onTogglePlay(); // Use the prop instead of direct dispatch
+            }}
+            onKeyPress={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onTogglePlay();
+              }
             }}
             $isPlaying={musicState.isPlaying}
             initial={{ opacity: 0 }}
@@ -983,7 +1199,7 @@ const TrackItem: React.FC<TrackItemProps> = ({
           {stats?.favorite ? (
             <motion.img
               key="favorite"
-              src="public/assets/icons/selected.png" // Use custom icon instead of ❤️
+              src="public/assets/icons/selected_later.png" // Changed from selected.png to selected_later.png
               alt="Favorite"
               width="20"
               height="20"
@@ -996,11 +1212,7 @@ const TrackItem: React.FC<TrackItemProps> = ({
           ) : (
             <motion.img
               key="not-favorite"
-              src={
-                isHovered
-                  ? "public/assets/icons/selected.png"
-                  : "public/assets/icons/add_1.png"
-              } // Use custom icons
+              src={isHovered ? ICONS.selected : ICONS.add}
               alt="Add to favorites"
               width="20"
               height="20"
@@ -1012,137 +1224,156 @@ const TrackItem: React.FC<TrackItemProps> = ({
             />
           )}
         </AnimatePresence>
-
-        <AnimatePresence>
-          {showExplosion && (
-            <FavoriteExplosion>
-              {particles.map((particle) => (
-                <SparkParticle
-                  key={particle.id}
-                  initial={{
-                    scale: 0,
-                    opacity: 1,
-                    x: 0,
-                    y: 0,
-                  }}
-                  animate={{
-                    scale: [0, 1, 0],
-                    opacity: [1, 0.8, 0],
-                    x: [
-                      0,
-                      Math.cos(particle.angle * (Math.PI / 180)) *
-                        particle.distance,
-                    ],
-                    y: [
-                      0,
-                      Math.sin(particle.angle * (Math.PI / 180)) *
-                        particle.distance,
-                    ],
-                  }}
-                  transition={{
-                    duration: 0.8,
-                    delay: particle.delay,
-                    ease: [0.2, 0.8, 0.2, 1],
-                  }}
-                  style={{
-                    width: `${particle.size}px`,
-                    height: `${particle.size}px`,
-                    background:
-                      particle.id % 3 === 0
-                        ? `radial-gradient(circle, rgba(76, 175, 80, 0.8), rgba(76, 175, 80, 0) 70%)` // Changed to green
-                        : particle.id % 3 === 1
-                        ? `radial-gradient(circle, rgba(129, 199, 132, 0.8), rgba(129, 199, 132, 0) 70%)` // Lighter green
-                        : `radial-gradient(circle, rgba(200, 230, 201, 0.8), rgba(200, 230, 201, 0) 70%)`, // Palest green
-                    boxShadow:
-                      particle.id % 3 === 0
-                        ? "0 0 8px rgba(76, 175, 80, 0.8)" // Changed to green
-                        : particle.id % 3 === 1
-                        ? "0 0 8px rgba(129, 199, 132, 0.8)" // Lighter green
-                        : "0 0 8px rgba(200, 230, 201, 0.8)", // Palest green
-                  }}
-                />
-              ))}
-
-              {/* Enhanced central burst */}
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
+      </EnhancedFavoriteButton>
+      <AnimatePresence>
+        {showExplosion && (
+          <FavoriteExplosion>
+            {particles.map((particle) => (
+              <SparkParticle
+                key={particle.id}
+                initial={{
+                  scale: 0,
+                  opacity: 1,
+                  x: 0,
+                  y: 0,
+                }}
                 animate={{
-                  scale: [0, 3, 0],
-                  opacity: [1, 0],
+                  scale: [0, 1, 0],
+                  opacity: [1, 0.8, 0],
+                  x: [
+                    0,
+                    Math.cos(particle.angle * (Math.PI / 180)) *
+                      particle.distance,
+                  ],
+                  y: [
+                    0,
+                    Math.sin(particle.angle * (Math.PI / 180)) *
+                      particle.distance,
+                  ],
                 }}
                 transition={{
-                  duration: 0.6,
-                  ease: "easeOut",
+                  duration: 0.8,
+                  delay: particle.delay,
+                  ease: [0.2, 0.8, 0.2, 1],
                 }}
                 style={{
-                  position: "absolute",
-                  width: "20px",
-                  height: "20px",
-                  borderRadius: "50%",
+                  width: `${particle.size}px`,
+                  height: `${particle.size}px`,
                   background:
-                    "radial-gradient(circle, rgba(76, 175, 80, 0.8) 0%, rgba(129, 199, 132, 0.4) 50%, rgba(76, 175, 80, 0) 70%)", // Changed to green gradient
-                  filter: "blur(2px)",
-                  transform: "translate(-50%, -50%)",
+                    particle.id % 3 === 0
+                      ? `radial-gradient(circle, rgba(76, 175, 80, 0.8), rgba(76, 175, 80, 0) 70%)` // Changed to green
+                      : particle.id % 3 === 1
+                      ? `radial-gradient(circle, rgba(129, 199, 132, 0.8), rgba(129, 199, 132, 0) 70%)` // Lighter green
+                      : `radial-gradient(circle, rgba(200, 230, 201, 0.8), rgba(200, 230, 201, 0) 70%)`, // Palest green
+                  boxShadow:
+                    particle.id % 3 === 0
+                      ? "0 0 8px rgba(76, 175, 80, 0.8)" // Changed to green
+                      : particle.id % 3 === 1
+                      ? "0 0 8px rgba(129, 199, 132, 0.8)" // Lighter green
+                      : "0 0 8px rgba(200, 230, 201, 0.8)", // Palest green
                 }}
               />
-            </FavoriteExplosion>
-          )}
-        </AnimatePresence>
-      </EnhancedFavoriteButton>
+            ))}
+
+            {/* Enhanced central burst */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{
+                scale: [0, 3, 0],
+                opacity: [1, 0],
+              }}
+              transition={{
+                duration: 0.6,
+                ease: "easeOut",
+              }}
+              style={{
+                position: "absolute",
+                width: "20px",
+                height: "20px",
+                borderRadius: "50%",
+                background:
+                  "radial-gradient(circle, rgba(76, 175, 80, 0.8) 0%, rgba(129, 199, 132, 0.4) 50%, rgba(76, 175, 80, 0) 70%)", // Changed to green gradient
+                filter: "blur(2px)",
+                transform: "translate(-50%, -50%)",
+              }}
+            />
+          </FavoriteExplosion>
+        )}
+      </AnimatePresence>
     </TrackItemContainer>
   );
 };
 
 // Styled components
-const ExplorerContainer = styled(motion.div)<{ $isExpanded: boolean }>`
+const ExplorerContainer = styled(motion.div).attrs<{ $isExpanded: boolean }>(
+  (props) => ({
+    style: {
+      width: props.$isExpanded
+        ? "100%" // Always 100% to fill available space when expanded
+        : window.innerWidth <= 768
+        ? "100px"
+        : "110px",
+      flex: props.$isExpanded ? 1 : "none", // Make it flex when expanded
+    },
+  })
+)`
   position: relative;
-  width: ${(props) => (props.$isExpanded ? "420px" : "110px")};
   height: 100%;
   backdrop-filter: blur(10px);
-  transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+  transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1),
+    height 0.4s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.3s ease,
+    transform 0.3s ease;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  user-select: none; // Add this to make all text unselectable by default
-  background: rgba(18, 18, 18, 0.4); /* Semi-transparent dark background */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  isolation: isolate; /* Create new stacking context for z-index */
+  background: rgba(18, 18, 18, 0.4);
+  box-shadow: none;
+  margin-left: 10px;
+  margin-right: 10px;
+  isolation: isolate;
 
   @media (max-width: 768px) {
-    width: ${(props) => (props.$isExpanded ? "100%" : "100px")};
-    height: ${(props) => (props.$isExpanded ? "100%" : "630px")};
-    border-radius: 0;
+    position: ${(props) => (props.$isExpanded ? "relative" : "fixed")};
+    top: 0;
+    left: 0;
+    bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    height: ${(props) => (props.$isExpanded ? "100%" : "100vh")};
+    max-height: 100vh;
+    border-radius: 0; /* Remove border radius on mobile */
+    z-index: ${(props) => (props.$isExpanded ? 10 : 5)};
   }
 `;
 
 // Update the TrackItemContainer styled component
-const TrackItemContainer = styled(motion.div)<{
+const TrackItemContainer = styled(motion.div).attrs<{
   $isActive: boolean;
   $isExpanded: boolean;
-}>`
+}>((props) => ({
+  style: {
+    padding: props.$isExpanded ? "12px" : "4px",
+    gap: props.$isExpanded ? "12px" : "4px",
+    height: props.$isExpanded ? "auto" : "auto",
+    width: props.$isExpanded ? "auto" : "90px",
+    flexDirection: !props.$isExpanded ? "column" : "row",
+    alignItems: !props.$isExpanded ? "center" : "stretch",
+    justifyContent: !props.$isExpanded ? "center" : "flex-start",
+  },
+}))`
   display: flex;
-  align-items: center;
-  padding: ${(props) => (props.$isExpanded ? "12px" : "4px")};
   background: rgba(255, 255, 255, 0.03); /* Very subtle light background */
   border-radius: 8px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  gap: ${(props) => (props.$isExpanded ? "12px" : "4px")};
   transition: all 0.4s cubic-bezier(0.65, 0, 0.35, 1);
-  height: ${(props) => (props.$isExpanded ? "auto" : "auto")};
-  width: ${(props) => (props.$isExpanded ? "auto" : "90px")};
   backdrop-filter: blur(2px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-  ${(props) =>
-    !props.$isExpanded &&
-    `
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  `}
 
   /* Add subtle hover effect */
   &:hover {
@@ -1154,16 +1385,18 @@ const TrackItemContainer = styled(motion.div)<{
 
 // Update CoverArtWrapper to ensure circular shape when playing
 // Update the CoverArtWrapper dimensions
-const CoverArtWrapper = styled(motion.div)<{
+const CoverArtWrapper = styled(motion.div).attrs<{
   $isExpanded: boolean;
   $isActive: boolean;
   $isPlaying: boolean;
-}>`
+}>((props) => ({
+  style: {
+    width: props.$isExpanded ? "48px" : "72px",
+    height: props.$isExpanded ? "48px" : "72px",
+    borderRadius: props.$isActive && props.$isPlaying ? "50%" : "8px",
+  },
+}))`
   position: relative;
-  width: ${(props) => (props.$isExpanded ? "48px" : "72px")};
-  height: ${(props) => (props.$isExpanded ? "48px" : "72px")};
-  border-radius: ${(props) =>
-    props.$isActive && props.$isPlaying ? "50%" : "8px"};
   overflow: visible; // Changed to visible to show glow
   flex-shrink: 0;
   transform-origin: center;
@@ -1222,23 +1455,25 @@ const CoverArtWrapper = styled(motion.div)<{
 `;
 
 // Enhanced CoverArt component
-const CoverArt = styled(motion.img)<{ $isPlaying: boolean }>`
+const CoverArt = styled(motion.img).attrs<{ $isPlaying: boolean }>((props) => ({
+  style: {
+    borderRadius: props.$isPlaying ? "50%" : "8px",
+    boxShadow: props.$isPlaying ? "0 0 15px rgba(76, 175, 80, 0.3)" : "none",
+    animation: props.$isPlaying ? "spin 20s linear infinite" : "none",
+    filter: props.$isPlaying ? "brightness(1.1)" : "none",
+  },
+  draggable: false,
+}))`
   width: 100%;
   height: 100%;
   object-fit: cover;
   will-change: transform;
   transform-origin: center;
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: ${(props) => (props.$isPlaying ? "50%" : "8px")};
-  box-shadow: ${(props) =>
-    props.$isPlaying ? "0 0 15px rgba(76, 175, 80, 0.3)" : "none"};
-
-  ${(props) =>
-    props.$isPlaying &&
-    `
-    animation: spin 20s linear infinite;
-    filter: brightness(1.1);
-  `}
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
 `;
 
 // Update PlayingIndicator styled component
@@ -1253,31 +1488,16 @@ const PlayingIndicator = styled(motion.div)<{ $isPlaying: boolean }>`
   opacity: 0;
   border-radius: 50%; // Match parent's circular shape
   transition: all 0.3s ease;
+  z-index: 2;
 
-  // Only show hover effect when not playing
-  ${(props) =>
-    !props.$isPlaying &&
-    `
-    &:hover {
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(2px);
-    }
-  `}
+  &:hover {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+  }
 
   svg {
     opacity: ${(props) => (props.$isPlaying ? 0.9 : 1)};
     transition: opacity 0.3s ease;
-  }
-
-  // Only show on hover when not playing
-  ${CoverArtWrapper}:hover & {
-    opacity: ${(props) => (props.$isPlaying ? 0 : 1)};
-  }
-
-  // Show briefly when changing play state
-  &:active {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.4);
   }
 `;
 
@@ -1296,7 +1516,9 @@ const TrackTitle = styled.h3<{ $isActive: boolean }>`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  user-select: none; // Add this to make text unselectable
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   /* Add subtle text shadow for active items instead of background color */
   text-shadow: ${(props) =>
     props.$isActive ? "0 0 8px rgba(76, 175, 80, 0.3)" : "none"};
@@ -1309,7 +1531,9 @@ const TrackArtist = styled.p`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  user-select: none; // Add this to make text unselectable
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 `;
 
 const StatsContainer = styled(motion.div)`
@@ -1336,6 +1560,8 @@ const Controls = styled(motion.div)`
   gap: 8px;
   padding: 8px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--theme-background-gradient, rgba(0, 0, 0, 0.3));
+  classname: controls-section;
 `;
 
 const SearchInput = styled.input.attrs({
@@ -1373,84 +1599,67 @@ const Header = styled.div<{ $isExpanded: boolean }>`
   align-items: center;
   justify-content: ${(props) =>
     props.$isExpanded ? "space-between" : "center"};
-  padding: 12px;
+  padding: ${(props) => (props.$isExpanded ? "12px" : "8px")};
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(
-    18,
-    18,
-    18,
-    0.4
-  ); /* Semi-transparent to show colors but not overwhelm */
+  background: var(--theme-background-gradient, rgba(18, 18, 18, 0.4));
   position: relative;
   z-index: 1;
   backdrop-filter: blur(4px);
+
+  @media (max-width: 768px) {
+    flex-direction: ${(props) => (props.$isExpanded ? "row" : "column")};
+    height: ${(props) => (props.$isExpanded ? "auto" : "auto")};
+    padding: ${(props) => (props.$isExpanded ? "12px" : "10px")};
+    justify-content: space-between;
+  }
 `;
 
-// Update the Title styled component
-const Title = styled(motion.div)<{ $isExpanded: boolean }>`
-  font-size: ${(props) => (props.$isExpanded ? "1.5rem" : "1rem")};
+// Update Title component for better mobile optimization
+const Title = styled(motion.div).attrs<{ $isExpanded: boolean }>((props) => ({
+  style: {
+    fontSize: props.$isExpanded
+      ? window.innerWidth <= 768
+        ? "0.85rem" // Reduced from 1.25rem to 0.85rem for mobile
+        : "1.5rem"
+      : window.innerWidth <= 768
+      ? "0"
+      : "1.2rem",
+    padding: props.$isExpanded
+      ? window.innerWidth <= 768
+        ? "6px" // Reduced padding for mobile
+        : "16px"
+      : window.innerWidth <= 768
+      ? "0"
+      : "8px",
+  },
+}))`
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
-  padding: ${(props) => (props.$isExpanded ? "16px" : "8px")};
   transition: all 0.3s ease;
-  display: flex;
   align-items: center;
-  gap: 8px;48
+  gap: 4px; // Reduced gap for mobile
+  text-align: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (max-width: 768px) {
+    letter-spacing: -0.3px;
+    line-height: 1.1;
+  }
 `;
-48;
 
 // Define the rotation animation separately
-const rotateY = keyframes`
-  0% { transform: rotateY(0deg); }
-  100% { transform: rotateY(360deg); }
-`;
-
 // Update the TitleIcon component
-const TitleIcon = styled.img<{ $isOpen: boolean }>`
-  width: 24px;
-  height: 24px;
-  transform-style: preserve-3d;
-  transition: filter 0.3s ease;
-  cursor: pointer;
-  position: relative;
+// First, define the prop types for the ExpandButton
+interface ExpandButtonProps {
+  $isExpanded: boolean;
+}
 
-  ${(props) =>
-    props.$isOpen
-      ? css`
-          animation: ${rotateY} 4s linear infinite;
-        `
-      : css`
-          filter: brightness(0.7);
-          transform: rotateY(180deg);
-        `}
-
-  &:hover {
-    animation: none;
-    filter: drop-shadow(0 0 8px #4a9eff) brightness(1.2);
-    transform: scale(1.1);
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: -4px;
-    background: radial-gradient(
-      circle,
-      rgba(74, 158, 255, 0.2),
-      transparent 70%
-    );
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-  }
-
-  &:hover::after {
-    opacity: 1;
-  }
-`;
-
-const ExpandButton = styled(motion.button)`
+// Update the ExpandButton styled component
+const ExpandButton = styled(motion.button)<ExpandButtonProps>`
   background: none;
   border: none;
   color: white;
@@ -1462,6 +1671,16 @@ const ExpandButton = styled(motion.button)`
   align-items: center;
   justify-content: center;
   padding: 0;
+  transition: all 0.3s ease;
+
+  /* Add styling based on expanded state */
+  transform: rotate(${(props) => (props.$isExpanded ? "0deg" : "180deg")});
+  opacity: ${(props) => (props.$isExpanded ? 1 : 0.8)};
+
+  &:hover {
+    opacity: 1;
+    color: ${(props) => (props.$isExpanded ? "#4caf50" : "white")};
+  }
 `;
 
 const ContentContainer = styled(motion.div)`
@@ -1475,6 +1694,7 @@ const ContentContainer = styled(motion.div)`
   z-index: 1;
   background: rgba(18, 18, 18, 0.2); /* Very subtle background */
   backdrop-filter: blur(2px);
+  classname: content-container;
 
   /* Add this to ensure proper height calculation */
   & > div {
@@ -1562,45 +1782,80 @@ const IconButtonWithTooltip = styled(motion.button)<{ $active: boolean }>`
 // Add these styled components
 const SortingSection = styled(motion.div)`
   overflow: hidden;
-  background: rgba(18, 18, 18, 0.95);
+  background: var(--theme-background-gradient, rgba(0, 0, 0, 0.3));
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-color: var(--theme-border-color, rgba(255, 255, 255, 0.1));
+  padding: 12px 16px;
+  classname: sorting-section;
 `;
 
 const SortOptionList = styled(motion.div)`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 8px;
-  padding: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 8px;
+  }
 `;
 
 const SortOptionItem = styled(motion.button)<{ $isActive: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: 10px 14px;
   background: ${(props) =>
-    props.$isActive ? "rgba(76, 175, 80, 0.15)" : "rgba(255, 255, 255, 0.05)"};
+    props.$isActive
+      ? "linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1))"
+      : "rgba(0, 0, 0, 0.25)"};
   border: 1px solid
-    ${(props) => (props.$isActive ? "rgba(76, 175, 80, 0.3)" : "transparent")};
-  border-radius: 6px;
-  color: ${(props) =>
-    props.$isActive ? "#4caf50" : "rgba(255, 255, 255, 0.8)"};
+    ${(props) =>
+      props.$isActive ? "rgba(76, 175, 80, 0.4)" : "rgba(255, 255, 255, 0.1)"};
+  border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: ${(props) =>
+    props.$isActive ? "0 2px 6px rgba(76, 175, 80, 0.15)" : "none"};
+
+  /* Ensure all text is consistent */
+  span {
+    color: white;
+    position: relative;
+    z-index: 2;
+    font-weight: ${(props) => (props.$isActive ? "600" : "400")};
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Direction indicator with animation */
+  .direction-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: ${(props) =>
+      props.$isActive ? "rgba(76, 175, 80, 0.2)" : "rgba(255, 255, 255, 0.1)"};
+    border-radius: 50%;
+  }
 
   &:hover {
     background: ${(props) =>
-      props.$isActive ? "rgba(76, 175, 80, 0.2)" : "rgba(255, 255, 255, 0.1)"};
+      props.$isActive
+        ? "linear-gradient(135deg, rgba(76, 175, 80, 0.25), rgba(76, 175, 80, 0.15))"
+        : "rgba(0, 0, 0, 0.35)"};
     transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
-  &:active {
-    transform: translateY(0px);
+  @media (max-width: 768px) {
+    padding: 8px 10px;
+    font-size: 13px;
   }
 `;
 
-// Add these styled components after the existing ones
+// Add these new styled components after the existing ones
 const LoadingContainer = styled(motion.div)`
   display: flex;
   flex-direction: column;
@@ -1678,22 +1933,43 @@ const SparkParticle = styled(motion.div)`
 `;
 
 // New styled components for album grid
-const AlbumGrid = styled.div<{ $isExpanded: boolean }>`
+const AlbumGrid = styled.div.attrs<{
+  $isExpanded: boolean;
+  $albumSize: number;
+}>((props) => ({
+  style: {
+    gridTemplateColumns: props.$isExpanded
+      ? window.innerWidth <= 768
+        ? `repeat(auto-fill, minmax(${Math.max(
+            80,
+            props.$albumSize * 0.8
+          )}px, 1fr))` // Slightly smaller on mobile
+        : `repeat(auto-fill, minmax(${props.$albumSize}px, 1fr))`
+      : "1fr",
+    gap: props.$isExpanded
+      ? window.innerWidth <= 768
+        ? "8px"
+        : "12px"
+      : "8px",
+    padding: props.$isExpanded
+      ? window.innerWidth <= 768
+        ? "8px"
+        : "12px"
+      : "6px",
+  },
+}))`
   display: grid;
-  grid-template-columns: ${(props) =>
-    props.$isExpanded
-      ? "repeat(auto-fill, minmax(120px, 1fr))" // More compact grid in expanded mode
-      : "1fr"};
-  gap: ${(props) => (props.$isExpanded ? "12px" : "8px")};
-  padding: ${(props) => (props.$isExpanded ? "12px" : "6px")};
   width: 100%;
 `;
 
-// Make AlbumCover smaller for better grid density
-const AlbumCover = styled(motion.div)<{ $isExpanded: boolean }>`
-  width: ${(props) => (props.$isExpanded ? "100%" : "72px")};
-  height: ${(props) => (props.$isExpanded ? "auto" : "72px")};
-  aspect-ratio: 1/1;
+// Update AlbumCover to properly handle size
+const AlbumCover = styled(motion.div)<{
+  $isExpanded: boolean;
+  $size?: number;
+}>`
+  width: ${(props) => (props.$isExpanded ? `${props.$size || 120}px` : "72px")};
+  height: ${(props) =>
+    props.$isExpanded ? `${props.$size || 120}px` : "72px"};
   position: relative;
   border-radius: 8px;
   overflow: hidden;
@@ -1843,6 +2119,16 @@ const AlbumSizeButton = styled(motion.button)`
   cursor: pointer;
   transition: all 0.2s ease;
 
+  @media (max-width: 768px) {
+    width: 24px; // Smaller size on mobile
+    height: 24px;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
   &:hover {
     background: rgba(255, 255, 255, 0.15);
     color: #4caf50;
@@ -1851,49 +2137,141 @@ const AlbumSizeButton = styled(motion.button)`
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
   }
 `;
 
 const AlbumSizeSlider = styled.div`
-  width: 100px;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+
+  /* Add more tick marks for finer granularity */
+  &::before,
+  &::after,
+  &::before ~ &::before,
+  &::after ~ &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 1px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-50%);
+    border-radius: 1px;
+    z-index: 1;
+  }
+
+  &::before {
+    left: 20%;
+  }
+  &::after {
+    left: 40%;
+  }
+  &::before ~ &::before {
+    left: 60%;
+  }
+  &::after ~ &::after {
+    left: 80%;
+  }
 `;
 
-const AlbumSizeProgress = styled.div<{ $progress: number }>`
+// Add the AlbumSizeProgress definition
+const AlbumSizeProgress = styled.div.attrs<{ $progress: number }>((props) => ({
+  style: {
+    width: `${props.$progress * 100}%`,
+  },
+}))`
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  width: ${(props) => props.$progress * 100}%;
-  background: linear-gradient(90deg, #4caf50, #66bb6a);
-  border-radius: 3px;
-  transition: width 0.3s ease;
+  background: linear-gradient(
+    90deg,
+    rgba(76, 175, 80, 0.8),
+    rgba(76, 175, 80, 0.5)
+  );
+  border-radius: 6px;
 `;
 
+// Fix the SliderThumb component with better event handling
+const SliderThumb = styled(motion.div).attrs<{ $progress: number }>(
+  (props) => ({
+    style: {
+      left: `${props.$progress * 100}%`,
+    },
+  })
+)`
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  background: white;
+  border: 2px solid var(--album-color-primary, rgba(76, 175, 80, 0.8));
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  z-index: 5;
+
+  @media (max-width: 768px) {
+    width: 14px; // Slightly smaller on mobile
+    height: 14px;
+    border-width: 1.5px;
+  }
+
+  &:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+
+  &:active {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+`;
+
+// Update the SliderThumb component to use pointer cursor instead of grab cursor
+
 // Create a container for header controls
-const HeaderControls = styled.div`
+const HeaderControls = styled.div<{ $isExpanded?: boolean }>`
   display: flex;
   align-items: center;
   gap: 12px;
+
+  @media (max-width: 768px) {
+    flex-direction: ${(props) => (!props.$isExpanded ? "column" : "row")};
+    align-items: ${(props) => (!props.$isExpanded ? "center" : "center")};
+    justify-content: ${(props) =>
+      !props.$isExpanded ? "flex-end" : "flex-start"};
+    height: ${(props) => (!props.$isExpanded ? "auto" : "auto")};
+    width: ${(props) => (!props.$isExpanded ? "100%" : "auto")};
+  }
 `;
 
-// Create a compact version of AlbumSizeControls for the header
+// Update CompactSizeControls for better mobile display
 const CompactSizeControls = styled(motion.div)`
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0;
-  height: 32px;
+  gap: 8px;
+  background: var(--theme-background-gradient, rgba(0, 0, 0, 0.35));
+  backdrop-filter: blur(10px);
+  padding: 6px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 10;
+
+  @media (max-width: 768px) {
+    padding: 4px 6px;
+    gap: 4px;
+    transform: scale(0.9);
+    margin-right: 8px;
+  }
 `;
 
 // Add this new component inside MusicExplorer.tsx
@@ -1937,10 +2315,6 @@ const AlbumArtColorVisualizer = () => {
           const r = imageData[i];
           const g = imageData[i + 1];
           const b = imageData[i + 2];
-
-          // Skip very dark or very light colors
-          if ((r < 20 && g < 20 && b < 20) || (r > 230 && g > 230 && b > 230))
-            continue;
 
           const hexColor = `#${r.toString(16).padStart(2, "0")}${g
             .toString(16)
@@ -2014,7 +2388,6 @@ const AlbumArtColorVisualizer = () => {
         ctx.beginPath();
 
         const amplitude = 12 + i * 8;
-        const period = canvas.width / (1 + i * 0.5);
         const speed = 0.002 + i * 0.001;
 
         ctx.moveTo(0, canvas.height / 2);
@@ -2050,9 +2423,149 @@ const AlbumArtColorVisualizer = () => {
     };
   }, [colors, isVisible]);
 
+  // 8. Update the useEffect in AlbumArtColorVisualizer to apply theme to all components
+  useEffect(() => {
+    if (colors.length < 2 || !isVisible) return;
+
+    // Get theme colors for consistent use
+    const primaryColor = colors[0];
+    const secondaryColor = colors[1];
+
+    // Apply to root document variables
+    document.documentElement.style.setProperty(
+      "--album-color-primary",
+      primaryColor
+    );
+    document.documentElement.style.setProperty(
+      "--album-color-secondary",
+      secondaryColor
+    );
+
+    // Create a single consistent gradient for all components
+    const backgroundGradient = `linear-gradient(135deg, 
+      ${primaryColor}15, 
+      ${secondaryColor}20)`;
+
+    const activeBgGradient = `linear-gradient(135deg, 
+      ${primaryColor}25, 
+      ${secondaryColor}30)`;
+
+    document.documentElement.style.setProperty(
+      "--theme-background-gradient",
+      backgroundGradient
+    );
+    document.documentElement.style.setProperty(
+      "--theme-active-gradient",
+      activeBgGradient
+    );
+    document.documentElement.style.setProperty(
+      "--theme-border-color",
+      `${primaryColor}40`
+    );
+
+    // Function to apply consistent styling to all components
+    const applyConsistentStyling = () => {
+      // Target all themed sections
+      const targetSelectors = [
+        ".header-section",
+        ".controls-section",
+        ".sorting-section",
+        ".filter-section",
+        ".size-controls",
+        ".content-container",
+        ".explorer-container",
+      ];
+
+      // Apply the exact same styling to all components
+      targetSelectors.forEach((selector) => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach((el) => {
+          const htmlEl = el as HTMLElement;
+
+          // Apply identical styling to all components
+          htmlEl.style.background = backgroundGradient;
+          htmlEl.style.borderColor = `${primaryColor}40`;
+          htmlEl.style.position = "relative";
+          htmlEl.style.zIndex = "1";
+
+          // Add a data attribute to track styled elements
+          htmlEl.setAttribute("data-theme-styled", "true");
+        });
+      });
+
+      // Style active elements consistently (like sort options)
+      const activeElements = document.querySelectorAll("[data-active='true']");
+      activeElements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        htmlEl.style.background = activeBgGradient;
+        htmlEl.style.borderColor = `${primaryColor}60`;
+
+        // Ensure text is consistent
+        const spans = htmlEl.querySelectorAll("span");
+        spans.forEach((span) => {
+          (span as HTMLElement).style.color = "white";
+          (span as HTMLElement).style.textShadow =
+            "0 1px 2px rgba(0, 0, 0, 0.6)";
+          (span as HTMLElement).style.fontWeight = "600";
+        });
+      });
+    };
+
+    // Apply consistent styling initially
+    applyConsistentStyling();
+
+    // Create a MutationObserver to ensure consistency is maintained
+    const observer = new MutationObserver(() => {
+      applyConsistentStyling();
+    });
+
+    // Observe the entire document for changes
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "data-active", "style"],
+    });
+
+    // Clean up function
+    return () => {
+      observer.disconnect();
+      document.documentElement.style.removeProperty("--album-color-primary");
+      document.documentElement.style.removeProperty("--album-color-secondary");
+      document.documentElement.style.removeProperty(
+        "--theme-background-gradient"
+      );
+      document.documentElement.style.removeProperty("--theme-active-gradient");
+      document.documentElement.style.removeProperty("--theme-border-color");
+
+      // Remove all applied styles
+      const styledElements = document.querySelectorAll(
+        '[data-theme-styled="true"]'
+      );
+      styledElements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        htmlEl.style.removeProperty("background");
+        htmlEl.style.removeProperty("border-color");
+        htmlEl.style.removeProperty("position");
+        htmlEl.style.removeProperty("z-index");
+        htmlEl.removeAttribute("data-theme-styled");
+
+        // Clean up spans
+        const spans = htmlEl.querySelectorAll("span");
+        spans.forEach((span) => {
+          (span as HTMLElement).style.removeProperty("color");
+          (span as HTMLElement).style.removeProperty("text-shadow");
+          (span as HTMLElement).style.removeProperty("font-weight");
+        });
+      });
+    };
+  }, [colors, isVisible]);
+
+  // 2. Update how the ColorCanvas is used in the return statement of AlbumArtColorVisualizer
   return (
     <ColorCanvas
       ref={canvasRef}
+      opacity={isVisible ? 0.85 : 0}
       initial={{ opacity: 0 }}
       animate={{ opacity: isVisible ? 0.85 : 0 }}
       transition={{ duration: 1.2 }}
@@ -2061,7 +2574,13 @@ const AlbumArtColorVisualizer = () => {
 };
 
 // Add these styled components
-const ColorCanvas = styled(motion.canvas)`
+const ColorCanvas = styled(motion.canvas).attrs<{ opacity?: number }>(
+  (props) => ({
+    style: {
+      opacity: props.opacity !== undefined ? props.opacity : 0.85,
+    },
+  })
+)`
   position: absolute;
   top: 0;
   left: 0;
@@ -2114,6 +2633,204 @@ const CategoryIconWrapper = styled.div<{ $active: boolean }>`
         ? "brightness(1.3) drop-shadow(0 0 4px rgba(76, 175, 80, 0.9))"
         : "brightness(1.2) drop-shadow(0 0 3px rgba(255, 255, 255, 0.5))"};
     transform: scale(1.1);
+  }
+`;
+
+// Add these new styled components for the slider thumb and size preview
+// Update the EmailPopup styled component with improved positioning
+// Add the missing TypewriterText styled component
+// Add SliderContainer component definition
+const SliderContainer = styled.div`
+  position: relative;
+  width: 120px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+
+  @media (max-width: 768px) {
+    width: 80px; // Smaller width on mobile
+    height: 20px;
+    padding: 0 4px;
+  }
+
+  /* Create a slight background for better visibility */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    z-index: 0;
+  }
+`;
+
+// Add SizeLabel component definition
+const StyledImage = styled.img`
+  object-fit: contain;
+  width: 16px;
+  height: 16px;
+`;
+
+const EmptyStateMessage = styled.div`
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  padding: 16px;
+`;
+
+// Add a global style component to ensure all text in the explorer is unselectable
+const ExplorerGlobalStyles = createGlobalStyle`
+  .explorer-container * {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  .explorer-container img {
+    -webkit-user-drag: none;
+    user-drag: none;
+    pointer-events: none;
+  }
+`;
+
+// Add these custom icon components right after the other styled components
+
+// Custom SVG icons for album size control
+const SmallAlbumIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect
+      x="8"
+      y="8"
+      width="8"
+      height="8"
+      rx="1"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <path
+      d="M6 8.5L6 15.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M18 8.5L18 15.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M8.5 6L15.5 6"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M8.5 18L15.5 18"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const LargeAlbumIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect
+      x="4"
+      y="4"
+      width="16"
+      height="16"
+      rx="1"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <path
+      d="M1 4.5L1 19.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M23 4.5L23 19.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M4.5 1L19.5 1"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M4.5 23L19.5 23"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+// Enhance the AlbumSizeButton with tooltips
+const AlbumSizeButtonWithTooltip = styled(AlbumSizeButton)`
+  position: relative;
+
+  &::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  &:hover::before {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+`;
+
+// Add the SizeTooltip component if it doesn't exist
+const SizeTooltip = styled.div`
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+  ${SliderThumb}:hover & {
+    opacity: 1;
   }
 `;
 

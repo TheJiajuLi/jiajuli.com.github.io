@@ -5,7 +5,13 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { PlayerState, Track, SidebarMode } from "../types/music";
+import {
+  PlayerState,
+  Track,
+  SidebarMode,
+  PlaybackContext,
+} from "../types/music";
+import { CommunityTrackEvent } from "../types/events";
 import musicLibrary from "../data/musicLibrary";
 import LocalStorage from "../utils/LocalStorage"; // Import LocalStorage utility
 
@@ -58,7 +64,8 @@ type MusicAction =
   | { type: "USER_INTERACTION" } // Track general user interactions
   | { type: "TOGGLE_SIDEBAR_VISIBILITY" } // Add this new action type
   | { type: "SET_SIDEBAR_OPEN"; payload: boolean } // Add this new action type
-  | { type: "SET_ACTIVE_CONTEXT"; payload: PlaybackContext }; // Add new action type
+  | { type: "SET_ACTIVE_CONTEXT"; payload: PlaybackContext } // Add new action type
+  | { type: "ADD_TRACK"; payload: Track }; // Add new action type
 
 // Reducer to handle state changes
 const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
@@ -293,6 +300,11 @@ const musicReducer = (state: PlayerState, action: MusicAction): PlayerState => {
         activeContext: action.payload,
         queue: action.payload.tracks, // Update queue to match context
       };
+    case "ADD_TRACK":
+      return {
+        ...state,
+        queue: [...state.queue, action.payload],
+      };
     default:
       return state;
   }
@@ -325,6 +337,31 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
     // Clean up old data
     LocalStorage.cleanupOldData();
   }, []);
+
+  // Add the event listener to handle new community tracks
+  useEffect(() => {
+    const handleCommunityTrackAdded = (event: CommunityTrackEvent) => {
+      const track = event.detail;
+      console.log("Community track added:", track);
+
+      dispatch({
+        type: "ADD_TRACK",
+        payload: track,
+      });
+    };
+
+    window.addEventListener(
+      "community-track-added",
+      handleCommunityTrackAdded as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "community-track-added",
+        handleCommunityTrackAdded as EventListener
+      );
+    };
+  }, [dispatch]);
 
   return (
     <MusicContext.Provider value={{ state, dispatch, isLoadingTracks }}>

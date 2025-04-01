@@ -1,45 +1,46 @@
-export type SidebarMode = "auto" | "always" | "manual";
+/**
+ * Defines available repeat modes for the music player
+ */
+export type RepeatMode = 'off' | 'all' | 'one';
 
+/**
+ * Defines available sidebar modes for the music player
+ */
+export type SidebarMode = 'queue' | 'lyrics' | 'about' | 'related' | 'manual';
+
+/**
+ * Defines available genre types for the music tracks
+ */
+export type GenreType = 'classical' | 'rock' | 'pop' | 'electronic' | 'jazz' | 'ambient' | 'soundtrack' | 'hiphop';
+
+/**
+ * Defines the structure of a music track in the application
+ */
 export interface Track {
   id: string;
   title: string;
   artist: string;
   album: string;
-  genre: string;
+  genre: GenreType;
   coverArt: string;
   audioSrc: string;
   duration: number;
-  color: string;
+  color?: string;
 }
 
-export type Genre = 'electronic' | 'rock' | 'jazz' | 'classical' | 'pop' | string;
-
-export type RepeatMode = "off" | "all" | "one";
-
-// Update PlaybackContext type to be more specific
-export type PlaybackContextType = 
-  | 'playlist' 
-  | 'favorites' 
-  | 'explorer' 
-  | 'artist' 
-  | 'album' 
-  | 'search' 
-  | 'recent'
-  | 'mostPlayed';
-
+/**
+ * Defines the context in which tracks are being played
+ */
 export interface PlaybackContext {
   id: string;
-  type: PlaybackContextType;
-  tracks: Track[];
+  type: 'album' | 'playlist' | 'artist' | 'queue';
   name: string;
-  sourceId?: string; // For tracking source playlist/artist/album
-  viewConfig?: {
-    sortBy?: 'title' | 'artist' | 'album' | 'plays' | 'recent' | 'favorite';
-    filterBy?: string;
-    isAscending?: boolean;
-  };
+  tracks: Track[];
 }
 
+/**
+ * Defines the state of the music player
+ */
 export interface PlayerState {
   currentTrack: Track | null;
   isPlaying: boolean;
@@ -57,9 +58,6 @@ export interface PlayerState {
   error: string | null;
   lastUserAction: number;
   lastSidebarInteraction: number;
-  sidebarOpen: boolean; // Add this line to include the new property
-  activeContext: PlaybackContext | null;
-  previousContext: PlaybackContext | null; // Add this to track previous context
-  contextHistory: PlaybackContext[]; // Add this to maintain context history
-  repeatContext: boolean; // Add this to specifically repeat current context
+  sidebarOpen: boolean;
+  activeContext?: PlaybackContext;
 }

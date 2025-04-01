@@ -33,7 +33,8 @@ const trackCovers = {
 
 const albumCovers = {
   urban_blues: "/assets/covers/urban_blues.jpeg",
-  miss_g: "/assets/covers/miss_g.jpeg"
+  miss_g: "/assets/covers/miss_g.jpeg",
+  十一月的萧邦: "/assets/covers/11月的萧邦.jpg"
 };
 
 // Define colors by genre
@@ -363,6 +364,17 @@ export const musicLibrary: Track[] = [
     coverArt: albumCovers.urban_blues,
     audioSrc: "/assets/musics/single_tracks/missing_you.mp3",
     duration: 210,
+    color: genreColors.pop
+  },
+  {
+    id: "pop-4",
+    title: "夜曲 (Nocturne)",
+    artist: "Jay Chou",
+    album: "November's chopin",
+    genre: "pop",
+    coverArt: albumCovers.十一月的萧邦,
+    audioSrc: "/assets/musics/single_tracks/夜曲.mp3",
+    duration: 200,
     color: genreColors.pop
   },
   

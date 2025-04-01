@@ -1,19 +1,28 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useThemeContext } from '../../context/ThemeContext';
-import { FiSettings } from 'react-icons/fi';
+import React, { useState } from "react";
+import styled from "styled-components";
+import { motion, AnimatePresence } from "framer-motion";
+import { useThemeContext } from "../../context/ThemeContext";
+import { FiSettings } from "react-icons/fi";
+import { ThemeType } from "../../styles/themes";
 
-const ThemeSwitcher: React.FC = () => {
+interface ThemeControls {
+  opacity?: number;
+  onOpacityChange?: (value: number) => void;
+}
+
+const ThemeSwitcher: React.FC<ThemeControls> = () => {
   const { currentTheme, setTheme, availableThemes } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleOpen = () => setIsOpen(!isOpen);
+  const handleThemeChange = (themeId: ThemeType) => {
+    setTheme(themeId);
+    setIsOpen(false);
+  };
 
   return (
     <ThemeSwitcherContainer>
       <ThemeButton
-        onClick={toggleOpen}
+        onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -27,17 +36,13 @@ const ThemeSwitcher: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2 }}
           >
-            <ThemePanelHeader>Select Theme</ThemePanelHeader>
+            <ThemePanelHeader>Themes</ThemePanelHeader>
             <ThemeList>
               {availableThemes.map((theme) => (
                 <ThemeOption
                   key={theme.id}
-                  onClick={() => {
-                    setTheme(theme.id);
-                    setIsOpen(false);
-                  }}
+                  onClick={() => handleThemeChange(theme.id)}
                   $isActive={currentTheme.id === theme.id}
                 >
                   <ThemeColorPreview $theme={theme} />
@@ -122,7 +127,8 @@ const ThemeOption = styled.button<{ $isActive: boolean }>`
   display: flex;
   align-items: center;
   gap: 12px;
-  background: ${(props) => props.$isActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent'};
+  background: ${(props) =>
+    props.$isActive ? "rgba(255, 255, 255, 0.1)" : "transparent"};
   color: white;
   border: none;
   border-radius: 8px;
@@ -148,16 +154,18 @@ const ThemeColorPreview = styled.div<{ $theme: any }>`
   overflow: hidden;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(to right, 
-      transparent 0%, 
-      ${(props) => props.$theme.ui.accent}66 50%, 
-      transparent 100%);
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      ${(props) => props.$theme.ui.accent}66 50%,
+      transparent 100%
+    );
   }
 `;
 
@@ -173,6 +181,47 @@ const ActiveIndicator = styled(motion.div)`
   height: 8px;
   border-radius: 50%;
   background: #4caf50;
+`;
+
+const ControlsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+`;
+
+const ControlOption = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const ControlLabel = styled.span`
+  font-size: 14px;
+  color: ${({ theme }) => theme.text?.primary || "#fff"};
+`;
+
+const OpacitySlider = styled.input`
+  width: 100%;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: ${({ theme }) => theme.background?.tertiary || "#333"};
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: ${({ theme }) => theme.ui?.accent || "#fff"};
+    cursor: pointer;
+  }
+`;
+
+const OpacityValue = styled.span`
+  font-size: 12px;
+  color: ${({ theme }) => theme.text?.secondary || "#999"};
+  text-align: right;
 `;
 
 export default ThemeSwitcher;

@@ -7,6 +7,6 @@ export default defineConfig({
   base: '/dreamingpolar.com.github.io/',
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    emptyOutDir: true,
   },
 });

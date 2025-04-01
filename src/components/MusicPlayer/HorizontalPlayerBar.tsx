@@ -1,16 +1,19 @@
 import React, { useRef, useState, useEffect } from "react";
 import styled, { keyframes, css, useTheme } from "styled-components"; // Add useTheme
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion, HTMLMotionProps, AnimatePresence } from "framer-motion";
 import { useMusicContext } from "../../context/MusicContext";
+import { useThemeContext } from "../../context/ThemeContext"; // Import theme context
 import {
   FaPlay,
   FaPause,
   FaStepForward,
   FaStepBackward,
   FaVolumeUp,
+  FaPalette,
 } from "react-icons/fa";
+import { Link } from "react-router-dom"; // Import Link for navigation
 import { getSafeCoverArt } from "../../utils/imageUtils";
-import { AppTheme } from "../../styles/themes"; // Import the AppTheme type
+import { AppTheme, ThemeType } from "../../styles/themes"; // Import the AppTheme and ThemeType types
 
 // Define Genre type based on the categories used
 type Genre =
@@ -23,11 +26,6 @@ type Genre =
   | string;
 
 // Add these animations at the top after imports
-const shimmerEffect = keyframes`
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100%); }
-`;
-
 // Add these new animations at the top
 const breatheAnimation = keyframes`
   0% { transform: scale(1); }
@@ -192,8 +190,8 @@ const TimeTooltip = styled.div<{ $visible: boolean; $position: string }>`
   background: ${({ theme }) =>
     theme.id === "contrast-light"
       ? "rgba(0, 0, 0, 0.8)"
-      : theme.player.controls};
-  color: ${({ theme }) => theme.text.primary};
+      : theme.player?.controls || "rgba(0, 0, 0, 0.8)"};
+  color: ${({ theme }) => theme.text?.primary || "#ffffff"};
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -202,7 +200,9 @@ const TimeTooltip = styled.div<{ $visible: boolean; $position: string }>`
   pointer-events: none;
   border: 1px solid
     ${({ theme }) =>
-      theme.id === "contrast-light" ? "transparent" : theme.explorer.border};
+      theme.id === "contrast-light"
+        ? "transparent"
+        : theme.explorer?.border || "rgba(255, 255, 255, 0.1)"};
 `;
 
 const VolumeSlider = styled.input`
@@ -236,74 +236,19 @@ const VolumeSlider = styled.input`
 // Update the HorizontalBar container by removing shimmer animation
 const HorizontalBar = styled(motion.div)<{ $themeId?: string }>`
   position: fixed;
-  bottom: 0;
+  bottom: -15px;
   left: 0;
   right: 0;
   height: 72px;
-  background: ${({ theme }) => theme.player.controls};
-  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   padding: 0 24px;
   gap: 24px;
   z-index: 100;
 
-  /* Theme-specific styling */
-  ${({ theme }) => {
-    switch (theme.id) {
-      case "space-grey":
-        return css`
-          box-shadow: 0 -3px 16px rgba(0, 0, 0, 0.4);
-        `;
-      case "ocean-blue":
-        return css`
-          background: linear-gradient(
-            180deg,
-            ${theme.player.controls} 0%,
-            rgba(0, 92, 151, 0.98) 100%
-          );
-        `;
-      case "cyber-punk":
-        return css`
-          box-shadow: 0 -4px 20px ${theme.ui.accent}33;
-          &::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(
-              90deg,
-              transparent 0%,
-              ${theme.ui.accent} 50%,
-              transparent 100%
-            );
-            opacity: 0.7;
-          }
-        `;
-      case "contrast-light":
-        return css`
-          border-top: 1px solid ${theme.explorer.border};
-        `;
-      default:
-        return "";
-    }
-  }}
-
-  /* Responsive hover effects */
-  @media (hover: hover) {
-    &:hover {
-      background: ${({ theme }) =>
-        theme.id === "contrast-light"
-          ? "rgba(245, 245, 245, 0.98)"
-          : theme.id === "cyber-punk"
-          ? "rgba(20, 0, 40, 0.98)"
-          : theme.id === "ocean-blue"
-          ? "rgba(0, 82, 141, 0.98)"
-          : "rgba(24, 24, 24, 0.98)"};
-    }
-  }
+  /* Remove hover effect and keep background consistent */
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Mobile optimization */
   @media (max-width: 768px) {
@@ -311,9 +256,11 @@ const HorizontalBar = styled(motion.div)<{ $themeId?: string }>`
     padding: 0 16px;
     gap: 16px;
   }
+`;
 
-  /* Smooth transitions */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+const PlayerBarContainer = styled.div`
+  backdrop-filter: blur(10px);
+  transition: background 0.3s ease;
 `;
 
 // Update the TrackSection container
@@ -502,16 +449,117 @@ const VolumeButton = styled(IconButton)<{ $isMuted: boolean }>`
   }
 `;
 
+const ThemeSwitcherContainer = styled.div`
+  position: relative;
+`;
+
+const ThemeSwitcherButton = styled(IconButton)`
+  position: relative;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
+const ThemePopover = styled(motion.div)`
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 8px;
+  background: ${({ theme }) =>
+    theme.player?.controls || theme.background?.secondary || "#1a1a1a"};
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  width: 220px;
+  z-index: 101;
+  border: 1px solid
+    ${({ theme }) => theme.explorer?.border || "rgba(255, 255, 255, 0.1)"};
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    right: 12px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid
+      ${({ theme }) =>
+        theme.player?.controls || theme.background?.secondary || "#1a1a1a"};
+  }
+`;
+
+// Add this before the ThemeOption styled component
+const ThemeGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 8px;
+`;
+
+// Update ThemeOption component to use fallback values
+const ThemeOption = styled(motion.div)<{ $isActive: boolean; $color: string }>`
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  border: 2px solid
+    ${(props) =>
+      props.$isActive ? props.theme.ui?.accent || "#007aff" : "transparent"};
+  background: ${(props) => props.$color};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: scale(1.05);
+    border-color: ${(props) =>
+      props.theme.ui?.accent
+        ? `${props.theme.ui.accent}80`
+        : "rgba(0, 122, 255, 0.5)"};
+  }
+`;
+
 const formatTime = (time: number) => {
   const minutes = Math.floor(time / 60);
   const seconds = Math.floor(time % 60);
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 };
 
+// Add theme options type definition
+interface ThemeOption {
+  id: ThemeType;
+  name: string;
+  color: string;
+}
+
+// Update the theme options to match ThemeType
+const themeOptions: ThemeOption[] = [
+  { id: "dark", name: "Dark", color: "#121212" },
+  { id: "light", name: "Light", color: "#f5f5f5" },
+  { id: "space-grey", name: "Space Grey", color: "#1e2132" },
+  { id: "ocean-blue", name: "Ocean Blue", color: "#00547a" },
+  { id: "cyber-punk", name: "Cyberpunk", color: "#19002e" },
+  { id: "contrast-light", name: "High Contrast", color: "#ffffff" },
+];
+
+// Add type guard for theme
+const isValidTheme = (theme: any): theme is AppTheme => {
+  return theme && typeof theme === "object" && "id" in theme;
+};
+
 // Update the component type to include motion props
-const HorizontalPlayerBar: React.FC<HTMLMotionProps<"div">> = (props) => {
+const HorizontalPlayerBar: React.FC = () => {
+  const theme = useTheme();
+
+  if (!isValidTheme(theme)) {
+    console.warn("Invalid theme provided to HorizontalPlayerBar");
+    return null;
+  }
+
   const { state, dispatch } = useMusicContext();
-  const theme = useTheme() as AppTheme; // Access the current theme
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -520,6 +568,31 @@ const HorizontalPlayerBar: React.FC<HTMLMotionProps<"div">> = (props) => {
   const [hoverTime, setHoverTime] = useState("0:00");
   const [isMuted, setIsMuted] = useState(false);
   const previousVolume = useRef(state.volume);
+
+  // Add these new state variables for the theme switcher
+  const [isThemePopoverOpen, setIsThemePopoverOpen] = useState(false);
+  const themePopoverRef = useRef<HTMLDivElement>(null);
+  const { setTheme, currentTheme } = useThemeContext();
+
+  // Add a click outside handler for the theme popover
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        themePopoverRef.current &&
+        !themePopoverRef.current.contains(event.target as Node) &&
+        !(event.target as Element).closest(
+          'button[aria-label="Theme switcher"]'
+        )
+      ) {
+        setIsThemePopoverOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Add playback controls
   const handlePlayPause = () => {
@@ -589,13 +662,6 @@ const HorizontalPlayerBar: React.FC<HTMLMotionProps<"div">> = (props) => {
     }
   };
 
-  const handleProgressMouseUp = () => {
-    setIsDraggingProgress(false);
-    if (state.isPlaying && audioRef.current) {
-      audioRef.current.play().catch(console.error);
-    }
-  };
-
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (isDraggingProgress && progressBarRef.current && audioRef.current) {
@@ -640,111 +706,161 @@ const HorizontalPlayerBar: React.FC<HTMLMotionProps<"div">> = (props) => {
 
   // Update the component mount animation
   return (
-    <HorizontalBar
-      {...props}
-      $themeId={theme.id}
-      initial={{ y: 100, opacity: 0 }}
-      animate={{
-        y: 0,
-        opacity: 1,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-          mass: 1,
-        },
-      }}
-      exit={{
-        y: 100,
-        opacity: 0,
-        transition: {
-          duration: 0.2,
-          ease: "easeInOut",
-        },
+    <PlayerBarContainer
+      style={{
+        background: `rgba(0, 0, 0, 0.8)`,
       }}
     >
-      <TrackSection $category={state.currentTrack?.genre}>
-        <CoverArt
-          src={getSafeCoverArt(state.currentTrack?.coverArt)}
-          alt={state.currentTrack?.title || "Album art"}
-          $isPlaying={state.isPlaying}
-          $category={state.currentTrack?.genre}
-        />
-        <TrackInfo>
-          <Title>{state.currentTrack?.title || "No track"}</Title>
-          <Artist>{state.currentTrack?.artist || "No artist"}</Artist>
-        </TrackInfo>
-        <TimeInfo>
-          <span>{formatTime(state.progress)}</span>
-          <span>/</span>
-          <span>{formatTime(state.duration)}</span>
-        </TimeInfo>
-      </TrackSection>
-
-      <ControlsSection>
-        <PlaybackControls>
-          <IconButton onClick={handlePrevTrack} aria-label="Previous track">
-            <FaStepBackward />
-          </IconButton>
-          <PlayButton
-            onClick={handlePlayPause}
-            aria-label={state.isPlaying ? "Pause" : "Play"}
+      <HorizontalBar
+        $themeId={theme.id}
+        initial={{ y: 100, opacity: 0 }}
+        animate={{
+          y: 0,
+          opacity: 1,
+          transition: {
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+            mass: 1,
+          },
+        }}
+        exit={{
+          y: 100,
+          opacity: 0,
+          transition: {
+            duration: 0.2,
+            ease: "easeInOut",
+          },
+        }}
+      >
+        <TrackSection $category={state.currentTrack?.genre}>
+          <CoverArt
+            src={getSafeCoverArt(state.currentTrack?.coverArt)}
+            alt={state.currentTrack?.title || "Album art"}
             $isPlaying={state.isPlaying}
             $category={state.currentTrack?.genre}
-          >
-            {state.isPlaying ? <FaPause /> : <FaPlay />}
-          </PlayButton>
-          <IconButton onClick={handleNextTrack} aria-label="Next track">
-            <FaStepForward />
-          </IconButton>
-        </PlaybackControls>
-
-        <ProgressContainer>
-          <ProgressBar
-            ref={progressBarRef}
-            onMouseDown={handleProgressMouseDown}
-            onMouseMove={handleProgressHover}
-            onMouseLeave={() => {
-              setIsHoveringProgress(false);
-              if (!isDraggingProgress) {
-                setHoverTime("0:00");
-              }
-            }}
-          >
-            <Progress
-              $width={`${(state.progress / state.duration) * 100}%`}
-              $isDragging={isDraggingProgress}
-              $category={state.currentTrack?.genre}
-            />
-            {(isHoveringProgress || isDraggingProgress) && (
-              <TimeTooltip $visible={true} $position={hoverPosition}>
-                {hoverTime}
-              </TimeTooltip>
-            )}
-          </ProgressBar>
-        </ProgressContainer>
-      </ControlsSection>
-
-      <ExtraControls>
-        <VolumeControlWrapper>
-          <VolumeButton
-            onClick={handleVolumeToggle}
-            $isMuted={isMuted || state.volume === 0}
-            aria-label={isMuted ? "Unmute" : "Mute"}
-          >
-            <FaVolumeUp />
-          </VolumeButton>
-          <VolumeSlider
-            type="range"
-            min="0"
-            max="100"
-            value={Math.round(state.volume * 100)}
-            onChange={handleVolumeChange}
-            aria-label="Volume"
           />
-        </VolumeControlWrapper>
-      </ExtraControls>
-    </HorizontalBar>
+          <TrackInfo>
+            <Title>{state.currentTrack?.title || "No track"}</Title>
+            <Artist>{state.currentTrack?.artist || "No artist"}</Artist>
+          </TrackInfo>
+          <TimeInfo>
+            <span>{formatTime(state.progress)}</span>
+            <span>/</span>
+            <span>{formatTime(state.duration)}</span>
+          </TimeInfo>
+        </TrackSection>
+
+        <ControlsSection>
+          <PlaybackControls>
+            <IconButton onClick={handlePrevTrack} aria-label="Previous track">
+              <FaStepBackward />
+            </IconButton>
+            <PlayButton
+              onClick={handlePlayPause}
+              aria-label={state.isPlaying ? "Pause" : "Play"}
+              $isPlaying={state.isPlaying}
+              $category={state.currentTrack?.genre}
+            >
+              {state.isPlaying ? <FaPause /> : <FaPlay />}
+            </PlayButton>
+            <IconButton onClick={handleNextTrack} aria-label="Next track">
+              <FaStepForward />
+            </IconButton>
+          </PlaybackControls>
+
+          <ProgressContainer>
+            <ProgressBar
+              ref={progressBarRef}
+              onMouseDown={handleProgressMouseDown}
+              onMouseMove={handleProgressHover}
+              onMouseLeave={() => {
+                setIsHoveringProgress(false);
+                if (!isDraggingProgress) {
+                  setHoverTime("0:00");
+                }
+              }}
+            >
+              <Progress
+                $width={`${(state.progress / state.duration) * 100}%`}
+                $isDragging={isDraggingProgress}
+                $category={state.currentTrack?.genre}
+              />
+              {(isHoveringProgress || isDraggingProgress) && (
+                <TimeTooltip $visible={true} $position={hoverPosition}>
+                  {hoverTime}
+                </TimeTooltip>
+              )}
+            </ProgressBar>
+          </ProgressContainer>
+        </ControlsSection>
+
+        <ExtraControls>
+          <VolumeControlWrapper>
+            <VolumeButton
+              onClick={handleVolumeToggle}
+              $isMuted={isMuted || state.volume === 0}
+              aria-label={isMuted ? "Unmute" : "Mute"}
+            >
+              <FaVolumeUp />
+            </VolumeButton>
+            <VolumeSlider
+              type="range"
+              min="0"
+              max="100"
+              value={Math.round(state.volume * 100)}
+              onChange={handleVolumeChange}
+              aria-label="Volume"
+            />
+          </VolumeControlWrapper>
+
+          <ThemeSwitcherContainer>
+            <ThemeSwitcherButton
+              onClick={() => setIsThemePopoverOpen(!isThemePopoverOpen)}
+              aria-label="Theme switcher"
+            >
+              <FaPalette />
+            </ThemeSwitcherButton>
+
+            <AnimatePresence>
+              {isThemePopoverOpen && (
+                <ThemePopover
+                  ref={themePopoverRef}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ThemeGrid>
+                    {themeOptions.map((option) => (
+                      <ThemeOption
+                        key={option.id}
+                        $isActive={currentTheme.id === option.id}
+                        $color={option.color}
+                        onClick={() => {
+                          setTheme(option.id);
+                          setIsThemePopoverOpen(false);
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            setTheme(option.id);
+                            setIsThemePopoverOpen(false);
+                          }
+                        }}
+                        aria-label={`Switch to ${option.name} theme`}
+                        title={option.name}
+                      />
+                    ))}
+                  </ThemeGrid>
+                </ThemePopover>
+              )}
+            </AnimatePresence>
+          </ThemeSwitcherContainer>
+        </ExtraControls>
+      </HorizontalBar>
+    </PlayerBarContainer>
   );
 };
 
