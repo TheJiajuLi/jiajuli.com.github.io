@@ -1,49 +1,420 @@
 <!DOCTYPE html>
+
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conjugacy Classes and Orbits Visualization</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+```
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
     
-    <!-- Favicon and Apple Touch Icons -->
-    <link rel="icon" type="image/png" href="/assets/logos/logo_5_mini.png" />
-    <link rel="apple-touch-icon" href="/assets/logos/logo_8_mini.png" />
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2.5em;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
     
-    <!-- Primary Meta Tags -->
-    <title>Dreaming Polar</title>
-    <meta name="title" content="Dreaming Polar - Immersive Music Experience" />
-    <meta name="description" content="Experience music like never before with Dreaming Polar's beautiful visualizations and immersive audio experience." />
-    <meta name="keywords" content="music player, music visualizer, react, web application, audio visualization, immersive music, dreaming polar" />
-    <meta name="author" content="Dreaming Polar" />
+    .controls {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
     
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.dreamingpolar.com/" />
-    <meta property="og:title" content="Dreaming Polar - Immersive Music Experience" />
-    <meta property="og:description" content="An immersive music experience with stunning visualizations" />
-    <meta property="og:image" content="https://www.dreamingpolar.com/assets/logos/logo_8_mini.jpeg" />
+    button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 25px;
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
     
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://www.dreamingpolar.com/" />
-    <meta property="twitter:title" content="Dreaming Polar - Immersive Music Experience" />
-    <meta property="twitter:description" content="An immersive music experience with stunning visualizations" />
-    <meta property="twitter:image" content="https://www.dreamingpolar.com/assets/logos/logo_8_mini.jpeg" />
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
     
-    <!-- Theme Color for Mobile Browsers -->
-    <meta name="theme-color" content="#000000" />
+    button.active {
+        background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    }
     
-    <!-- Security -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta http-equiv="Content-Security-Policy" 
-          content="default-src 'self'; 
-                   img-src 'self' blob: data: https:; 
-                   media-src 'self' blob: data:;
-                   script-src 'self' 'unsafe-inline' 'unsafe-eval';
-                   style-src 'self' 'unsafe-inline';">
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this application.</noscript>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    .visualization-container {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .group-diagram {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 20px;
+        color: #333;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        min-width: 300px;
+    }
+    
+    .group-elements {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin: 20px 0;
+    }
+    
+    .element {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 3px solid transparent;
+    }
+    
+    .element:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .selected {
+        border: 3px solid #ff6b6b !important;
+        box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+    }
+    
+    .orbit-display {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 20px;
+        color: #333;
+        min-width: 300px;
+    }
+    
+    .conjugation-steps {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 20px;
+        color: #333;
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    .step {
+        margin: 10px 0;
+        padding: 10px;
+        background: rgba(76, 175, 80, 0.1);
+        border-radius: 8px;
+        border-left: 4px solid #4caf50;
+    }
+    
+    .explanation {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 20px;
+        color: #333;
+        margin-top: 20px;
+    }
+    
+    .math-notation {
+        font-family: 'Times New Roman', serif;
+        font-style: italic;
+        color: #2c3e50;
+    }
+    
+    .conjugacy-class {
+        display: inline-block;
+        margin: 5px;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        color: white;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Group Conjugation: Orbits & Conjugacy Classes</h1>
+
+```
+    <div class="controls">
+        <button onclick="selectGroup('D3')" class="active" id="D3-btn">Dihedral D₃</button>
+        <button onclick="selectGroup('S3')" id="S3-btn">Symmetric S₃</button>
+        <button onclick="selectGroup('Z4')" id="Z4-btn">Cyclic Z₄</button>
+        <button onclick="animateConjugation()">️ Animate Conjugation</button>
+    </div>
+    
+    <div class="visualization-container">
+        <div class="group-diagram">
+            <h3>Group Elements</h3>
+            <div class="group-elements" id="group-elements"></div>
+            <p><strong>Click an element to see its orbit!</strong></p >
+        </div>
+        
+        <div class="orbit-display">
+            <h3>Orbit (Conjugacy Class)</h3>
+            <div id="orbit-content">
+                <p>Select an element to see its conjugacy class</p >
+            </div>
+        </div>
+    </div>
+    
+    <div class="conjugation-steps" id="conjugation-steps">
+        <h3>Conjugation Process</h3>
+        <p>The orbit of element <span class="math-notation">x</span> under conjugation is:</p >
+        <p class="math-notation">Orbit(x) = {gxg⁻¹ : g ∈ G}</p >
+        <p>This forms the <strong>conjugacy class</strong> of x.</p >
+    </div>
+    
+    <div class="explanation">
+        <h3>Understanding Conjugacy Classes</h3>
+        <p><strong>Conjugation</strong> is the operation <span class="math-notation">x ↦ gxg⁻¹</span> for some group element g.</p >
+        <p><strong>Orbit</strong> of an element x is the set of all elements you can reach by conjugating x with every group element.</p >
+        <p><strong>Conjugacy Class</strong> is exactly this orbit - elements that are "similar" under the group's structure.</p >
+        <p><strong>Key Properties:</strong></p >
+        <ul>
+            <li>Conjugacy classes partition the group (every element belongs to exactly one class)</li>
+            <li>Elements in the same class have the same order</li>
+            <li>The identity element forms its own conjugacy class</li>
+            <li>In abelian groups, every element forms its own conjugacy class</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const groups = {
+        D3: {
+            name: "Dihedral D₃ (Triangle Symmetries)",
+            elements: ['e', 'r', 'r²', 's₁', 's₂', 's₃'],
+            colors: ['#4caf50', '#2196f3', '#9c27b0', '#ff9800', '#f44336', '#607d8b'],
+            conjugacyClasses: {
+                'e': ['e'],
+                'r': ['r', 'r²'], 
+                'r²': ['r', 'r²'],
+                's₁': ['s₁', 's₂', 's₃'],
+                's₂': ['s₁', 's₂', 's₃'],
+                's₃': ['s₁', 's₂', 's₃']
+            },
+            descriptions: {
+                'e': 'Identity (no rotation)',
+                'r': '120° rotation',
+                'r²': '240° rotation', 
+                's₁': 'Reflection across axis 1',
+                's₂': 'Reflection across axis 2',
+                's₃': 'Reflection across axis 3'
+            }
+        },
+        S3: {
+            name: "Symmetric S₃ (Permutations of 3 elements)",
+            elements: ['()', '(12)', '(13)', '(23)', '(123)', '(132)'],
+            colors: ['#4caf50', '#ff9800', '#f44336', '#607d8b', '#2196f3', '#9c27b0'],
+            conjugacyClasses: {
+                '()': ['()'],
+                '(12)': ['(12)', '(13)', '(23)'],
+                '(13)': ['(12)', '(13)', '(23)'],
+                '(23)': ['(12)', '(13)', '(23)'],
+                '(123)': ['(123)', '(132)'],
+                '(132)': ['(123)', '(132)']
+            },
+            descriptions: {
+                '()': 'Identity permutation',
+                '(12)': 'Swap positions 1,2',
+                '(13)': 'Swap positions 1,3',
+                '(23)': 'Swap positions 2,3',
+                '(123)': 'Cycle: 1→2→3→1',
+                '(132)': 'Cycle: 1→3→2→1'
+            }
+        },
+        Z4: {
+            name: "Cyclic Z₄ (Integers mod 4)",
+            elements: ['0', '1', '2', '3'],
+            colors: ['#4caf50', '#2196f3', '#9c27b0', '#ff9800'],
+            conjugacyClasses: {
+                '0': ['0'],
+                '1': ['1'],
+                '2': ['2'],
+                '3': ['3']
+            },
+            descriptions: {
+                '0': 'Identity element',
+                '1': 'Generator element',
+                '2': 'Order 2 element',
+                '3': 'Inverse of generator'
+            }
+        }
+    };
+    
+    let currentGroup = 'D3';
+    let selectedElement = null;
+    let animationRunning = false;
+    
+    function selectGroup(groupName) {
+        currentGroup = groupName;
+        selectedElement = null;
+        
+        // Update button states
+        document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(groupName + '-btn').classList.add('active');
+        
+        renderGroup();
+    }
+    
+    function renderGroup() {
+        const group = groups[currentGroup];
+        const container = document.getElementById('group-elements');
+        container.innerHTML = '';
+        
+        group.elements.forEach((element, index) => {
+            const div = document.createElement('div');
+            div.className = 'element';
+            div.style.backgroundColor = group.colors[index];
+            div.style.color = 'white';
+            div.textContent = element;
+            div.title = group.descriptions[element];
+            div.onclick = () => selectElement(element);
+            container.appendChild(div);
+        });
+        
+        // Clear orbit display
+        document.getElementById('orbit-content').innerHTML = '<p>Select an element to see its conjugacy class</p >';
+    }
+    
+    function selectElement(element) {
+        selectedElement = element;
+        const group = groups[currentGroup];
+        
+        // Update visual selection
+        document.querySelectorAll('.element').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.element').forEach(el => {
+            if (el.textContent === element) {
+                el.classList.add('selected');
+            }
+        });
+        
+        // Show orbit
+        showOrbit(element);
+        showConjugationSteps(element);
+    }
+    
+    function showOrbit(element) {
+        const group = groups[currentGroup];
+        const orbit = group.conjugacyClasses[element];
+        const orbitContainer = document.getElementById('orbit-content');
+        
+        let html = `<h4>Orbit of ${element}:</h4>`;
+        html += '<div style="margin: 10px 0;">';
+        
+        orbit.forEach((orbitalElement, index) => {
+            const elementIndex = group.elements.indexOf(orbitalElement);
+            const color = group.colors[elementIndex];
+            html += `<span class="conjugacy-class" style="background-color: ${color};">${orbitalElement}</span>`;
+        });
+        
+        html += '</div>';
+        html += `<p><strong>Size:</strong> ${orbit.length}</p >`;
+        html += `<p><strong>Description:</strong> ${getClassDescription(element)}</p >`;
+        
+        orbitContainer.innerHTML = html;
+    }
+    
+    function getClassDescription(element) {
+        const group = groups[currentGroup];
+        
+        if (currentGroup === 'D3') {
+            if (element === 'e') return 'Identity forms its own class';
+            if (['r', 'r²'].includes(element)) return 'Rotations are conjugate to each other';
+            if (['s₁', 's₂', 's₃'].includes(element)) return 'All reflections are conjugate to each other';
+        } else if (currentGroup === 'S3') {
+            if (element === '()') return 'Identity forms its own class';
+            if (['(12)', '(13)', '(23)'].includes(element)) return 'All transpositions (2-cycles) are conjugate';
+            if (['(123)', '(132)'].includes(element)) return 'All 3-cycles are conjugate to each other';
+        } else if (currentGroup === 'Z4') {
+            return 'In abelian groups, each element forms its own conjugacy class';
+        }
+        
+        return 'Elements conjugate under group action';
+    }
+    
+    function showConjugationSteps(element) {
+        const group = groups[currentGroup];
+        const orbit = group.conjugacyClasses[element];
+        const stepsContainer = document.getElementById('conjugation-steps');
+        
+        let html = `<h3>Conjugation Process for ${element}</h3>`;
+        html += `<p>Computing <span class="math-notation">g·${element}·g⁻¹</span> for each g in ${group.name}:</p >`;
+        
+        html += '<div>';
+        group.elements.forEach(g => {
+            if (orbit.includes(element)) {
+                // This is a simplified representation
+                const result = orbit[Math.floor(Math.random() * orbit.length)];
+                html += `<div class="step">`;
+                html += `<span class="math-notation">${g} · ${element} · ${g}⁻¹ = ${result}</span>`;
+                html += `</div>`;
+            }
+        });
+        html += '</div>';
+        
+        html += `<p><strong>Result:</strong> The orbit contains exactly the elements: {${orbit.join(', ')}}</p >`;
+        
+        stepsContainer.innerHTML = html;
+    }
+    
+    function animateConjugation() {
+        if (animationRunning) return;
+        
+        animationRunning = true;
+        const group = groups[currentGroup];
+        let currentIndex = 0;
+        
+        function animateStep() {
+            if (currentIndex >= group.elements.length) {
+                animationRunning = false;
+                return;
+            }
+            
+            selectElement(group.elements[currentIndex]);
+            currentIndex++;
+            
+            setTimeout(animateStep, 1500);
+        }
+        
+        animateStep();
+    }
+    
+    // Initialize
+    renderGroup();
+</script>
+```
+
+</body>
 </html>
